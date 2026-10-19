@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Browser tests</title><body><pre id="results">Running</pre><iframe src="../index.html" title="Dashboard" style="width:375px;height:850px"></iframe><script>
+document.querySelector('iframe').addEventListener('load',function(){
+ const d=this.contentDocument, results=[];
+ function check(c,m){if(!c)throw Error(m);results.push('PASS: '+m)}
+ function edit(id,v){d.getElementById(id).value=v;d.getElementById(id).dispatchEvent(new Event('input',{bubbles:true}))}
+ try{
+ check(d.querySelectorAll('.kpi').length===4,'Four KPI cards');
+ check(this.contentWindow.getComputedStyle(d.querySelector('.kpi-grid')).display==='grid','Dashboard grid styles loaded');
+ check(this.contentWindow.getComputedStyle(d.getElementById('donut')).backgroundImage.includes('conic-gradient'),'Distribution chart styles loaded');
+ check(d.querySelectorAll('script[src], link[rel="stylesheet"]').length===0,'Preview needs no sibling asset files');
+ check(d.querySelector('.metric').textContent.includes('92.0'),'Sample SLA');
+ check(d.querySelectorAll('.badge.good').length===3,'Sample targets');
+ check(d.documentElement.scrollWidth<=375,'No mobile horizontal overflow');
+ d.getElementById('reset').click();
+ check([...d.querySelectorAll('input')].every(i=>i.value==='0'),'Reset zeroes totals');
+ check(d.querySelectorAll('.badge.neutral').length===4,'Zero results unavailable');
+ edit('offered',100);edit('answered',90);edit('withinSla',80);edit('abandoned',10);edit('handling',27000);
+ check(d.querySelectorAll('.badge.bad').length===3,'Live target failures');
+ check(d.querySelectorAll('.fill.miss').length===3,'Live chart updates');
+ edit('answered',101);check(!d.getElementById('error').hidden,'Invalid totals error');
+ check(d.querySelectorAll('.badge.neutral').length===4,'Stale results cleared');
+ edit('offered','');check(!d.getElementById('error').hidden,'Blank error');
+ edit('offered',-1);check(!d.getElementById('error').hidden,'Negative error');
+ d.getElementById('sample').click();check(d.getElementById('error').hidden&&d.querySelectorAll('.badge.good').length===3,'Sample restores results');
+ check(d.getElementById('donut').getAttribute('aria-label').includes('1,152 answered'),'Accessible chart totals');
+ document.getElementById('results').textContent=results.join('\n')+'\nALL BROWSER TESTS PASSED';
+ }catch(e){document.getElementById('results').textContent=results.join('\n')+'\nFAIL: '+e.message}
+});
+</script></body></html>
