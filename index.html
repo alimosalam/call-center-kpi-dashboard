@@ -1124,5 +1124,59 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
 
 </script>
 <!-- END EMBEDDED SCRIPTS -->
+<!-- Phase 1: personal command center (outside generated embedded assets) -->
+<style>
+.command-center{max-width:1440px;margin:20px auto 0;padding:0 5%;font-family:inherit}.command-shell{background:#fff;border:1px solid #e2e8ed;border-radius:12px;padding:18px 22px;box-shadow:0 3px 7px #1b3b5010}.command-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.command-title h2{font-size:18px;margin:0}.command-title p{font-size:12px;color:#667987;margin:6px 0 0}.command-controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}.command-controls label{flex:1;min-width:170px;font-size:12px}.command-controls select{margin-top:5px}.command-nav{display:flex;gap:8px;overflow-x:auto;margin-top:15px;padding-bottom:5px}.command-nav button{white-space:nowrap;background:#f4f7fa;border:1px solid #dce5ea;color:#142e40}.command-nav button[aria-current=page]{background:#148478;color:white;border-color:#148478}.command-message{margin-top:14px;padding:12px;border:1px solid #dce5ea;background:#f7fafb;border-radius:8px;color:#435d6d;font-size:12px;line-height:1.6}.command-message strong{color:#142e40}.command-upload{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.command-upload button{margin:0}.command-muted{color:#667987;font-size:11px}.command-center [hidden]{display:none!important}@media(max-width:650px){.command-center{padding:0 18px}.command-shell{padding:15px}.command-nav button{padding:9px 11px}}
+</style>
+<section class="command-center" aria-label="Contact center command center" id="command-center">
+<div class="command-shell">
+<div class="command-title"><div><h2>Contact Center Command Center</h2><p>Personal workspace · Phase 1 foundation · Existing call analytics preserved</p></div><span class="local-badge">Personal · Browser only</span></div>
+<div class="command-controls">
+<label>Account<select id="cc-account"><option value="Relaam">Relaam</option><option value="MAF Entertainment">MAF Entertainment</option><option value="Other">Other / Future account</option></select></label>
+<label>Site<select id="cc-site"><option value="All sites">All sites</option><option value="UAE">UAE</option><option value="Egypt">Egypt</option></select></label>
+</div>
+<nav class="command-nav" aria-label="Performance modules">
+<button type="button" data-cc-module="overview" aria-current="page">Overview</button>
+<button type="button" data-cc-module="calls">Calls</button>
+<button type="button" data-cc-module="emails">Emails</button>
+<button type="button" data-cc-module="quality">Quality</button>
+<button type="button" data-cc-module="csat">CSAT &amp; DSAT</button>
+<button type="button" data-cc-module="agents">Agent Performance</button>
+<button type="button" data-cc-module="reports">Management Reports</button>
+</nav>
+<div class="command-message" id="cc-module-message" role="status"><strong>Overview:</strong> Your existing Calls dashboard remains available below. Choose Calls to jump to the Ziwo workspace. Other modules are planned and will be implemented in later phases.</div>
+<div class="command-message command-upload"><div><strong>Data Upload Center · Calls</strong><div class="command-muted">Ziwo CSV/XLSX is supported today. Other report types are not yet imported.</div></div><button type="button" id="cc-open-ziwo">Go to Ziwo upload</button></div>
+<div class="command-muted" id="cc-context-note" style="margin-top:10px">Account and site are workspace labels only. They do not filter uploaded Ziwo data yet. Do not combine reports from different sites.</div>
+</div></section>
+<script>
+(function(){
+'use strict';
+const root=document.getElementById('command-center');
+const account=document.getElementById('cc-account'),site=document.getElementById('cc-site');
+const message=document.getElementById('cc-module-message');
+const descriptions={
+overview:'Your existing Calls dashboard remains available below. Other modules are planned and will be implemented in later phases.',
+calls:'Calls is available now. Use the existing Manual entry or Ziwo reports workspace below. Existing formulas, official and adjusted performance, approvals, trends, and Excel exports are unchanged.',
+emails:'Emails module is planned. Freshdesk upload, first-response SLA, backlog, and productivity are not yet implemented.',
+quality:'Quality module is planned. CC, EC, BC, NC audits and coaching tracking are not yet implemented.',
+csat:'CSAT & DSAT module is planned. Survey import and validation are not yet implemented.',
+agents:'Agent Performance is planned. Individual scorecards and agent-level reporting are not yet implemented.',
+reports:'Management Reports is planned. Existing Ziwo Excel exports remain available in the Calls workspace.'
+};
+function save(){try{localStorage.setItem('cc-personal-context-v1',JSON.stringify({account:account.value,site:site.value}));}catch(e){}}
+try{const stored=JSON.parse(localStorage.getItem('cc-personal-context-v1')||'null');if(stored){if([...account.options].some(o=>o.value===stored.account))account.value=stored.account;if([...site.options].some(o=>o.value===stored.site))site.value=stored.site;}}catch(e){}
+account.addEventListener('change',save);site.addEventListener('change',save);
+root.querySelectorAll('[data-cc-module]').forEach(btn=>btn.addEventListener('click',()=>{
+root.querySelectorAll('[data-cc-module]').forEach(b=>b.removeAttribute('aria-current'));btn.setAttribute('aria-current','page');
+const key=btn.dataset.ccModule;message.innerHTML='<strong>'+btn.textContent+':</strong> '+descriptions[key];
+if(key==='calls'){document.querySelector('.workspace-bar')?.scrollIntoView({behavior:'smooth',block:'start'});}
+}));
+document.getElementById('cc-open-ziwo').addEventListener('click',()=>{
+const existing=[...document.querySelectorAll('button')].find(b=>b.id!=='cc-open-ziwo'&&/Upload Ziwo Report/i.test(b.textContent||''));
+if(existing){existing.scrollIntoView({behavior:'smooth',block:'center'});existing.focus();}
+else{message.textContent='Find the existing Upload Ziwo Report control in the Calls workspace below.';}
+});
+})();
+</script>
 </body>
 </html>
