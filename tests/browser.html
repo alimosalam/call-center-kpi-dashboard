@@ -12,7 +12,7 @@ document.querySelector('iframe').addEventListener('load',function(){
  check(d.querySelectorAll('.badge.good').length===3,'Sample targets');
  check(d.documentElement.scrollWidth<=375,'No mobile horizontal overflow');
  d.getElementById('reset').click();
- check([...d.querySelectorAll('input')].every(i=>i.value==='0'),'Reset zeroes totals');
+ check([...d.querySelectorAll('#activity input')].every(i=>i.value==='0'),'Reset zeroes totals');
  check(d.querySelectorAll('.badge.neutral').length===4,'Zero results unavailable');
  edit('offered',100);edit('answered',90);edit('withinSla',80);edit('abandoned',10);edit('handling',27000);
  check(d.querySelectorAll('.badge.bad').length===3,'Live target failures');

@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Management Dashboard Tests</title><link rel="icon" href="data:,"></head><body><h1>Management summary and comparison tests</h1><pre id="results">Running…</pre><iframe src="../index.html" title="Dashboard under test" style="width:375px;height:900px"></iframe><script>
+document.querySelector('iframe').addEventListener('load',async function(){
+ const d=this.contentDocument,w=this.contentWindow,checks=[],out=document.getElementById('results');
+ const check=(c,label)=>{if(!c)throw Error(label);checks.push('PASS: '+label);out.textContent=checks.join('\n');};
+ const wait=async fn=>{for(let i=0;i<200;i++){if(fn())return;await new Promise(r=>setTimeout(r,25));}throw Error('Upload timeout');};
+ const change=(id,v)=>{d.getElementById(id).value=v;d.getElementById(id).dispatchEvent(new Event('change',{bubbles:true}));};
+ async function upload(name,data){const dt=new w.DataTransfer();dt.items.add(new w.File([data],name));d.getElementById('ziwo-file').files=dt.files;d.getElementById('ziwo-file').dispatchEvent(new Event('change',{bubbles:true}));await wait(()=>d.getElementById('ziwo-status').textContent.includes('22 original'));}
+ try{
+  const [csv,xlsx]=await Promise.all([fetch('../samples/ziwo-management-sample.csv').then(r=>r.text()),fetch('../samples/ziwo-management-sample.xlsx').then(r=>r.arrayBuffer())]);
+  w.fetch=()=>{throw Error('Unexpected application network request');};w.XMLHttpRequest.prototype.send=()=>{throw Error('Unexpected application network request');};
+  await upload('management.csv',csv);change('ziwo-view','mtd');
+  const stats=()=>[...d.querySelectorAll('#management-values strong')].map(e=>e.textContent);
+  check(stats()[0]==='77.09%','Management SLA from summed counts displays two decimals');
+  check(stats()[1]==='Below target'&&stats()[2]==='−12.91 pp','Target achievement and signed target gap');
+  check(stats()[3]==='8.45%','Management abandonment rate');
+  check(stats()[4]==='240.00 sec','Answered-weighted talk time remains separate from AHT');
+  check(stats()[5]==='2 / 11'&&stats()[6]==='2 / 11','Management below-SLA and above-abandonment day counts');
+  check(d.getElementById('management-warnings').textContent.includes('1 day(s) with offered calls but zero answered'),'Management zero-answer warning');
+  check(d.querySelectorAll('#quality-cards strong')[4].textContent==='1','Data Quality zero-answer count');
+  check(d.getElementById('quality-no-answers').textContent.includes('2026-10-04: 100 offered, 0 answered'),'Warning identifies zero-answer date and call volume');
+  check(d.getElementById('quality-investigation').textContent.includes('2026-10-04')&&d.getElementById('quality-investigation').textContent.includes('2026-10-11'),'Both requested October investigation dates listed');
+  check(d.querySelector('[data-date="2026-10-04"]').checked,'Zero-answer date stays included by default');
+  check(d.querySelector('#ziwo-summary .metric').textContent==='1,100','Zero-answer volume remains in totals');
+  check(d.getElementById('performance-records').textContent.includes('WARNING: offered calls with zero answered'),'Daily performance warning');
+  check(d.getElementById('performance-records').textContent.includes('Requested SLA investigation'),'Daily requested-investigation flags');
+  const periods=d.querySelectorAll('#period-comparison tr');
+  check(periods[0].children[1].textContent==='77.09%'&&periods[0].children[2].textContent==='90.00%'&&periods[0].children[3].textContent==='−12.91 pp','SLA comparison uses pp rather than percentage change');
+  check(periods[3].children[1].textContent==='1,100'&&periods[3].children[2].textContent==='880'&&periods[3].children[3].textContent==='+25.00%','Call volume comparison uses percent change');
+  check(d.getElementById('comparison-coverage').textContent.startsWith('Both periods have complete'),'Full period coverage disclosed');
+  check(d.getElementById('comparison-periods').textContent.includes('2026-09-01 → 2026-09-11'),'MTD previous period labels');
+  const rateCells=[...d.querySelectorAll('#performance-records tr')].filter(row=>row.children.length===10).flatMap(row=>[4,5,7].map(i=>row.children[i].textContent));
+  check(rateCells.length===33&&rateCells.every(text=>/\d+\.\d{2}%/.test(text)),'All daily rates use exactly two decimal places');
+  check(d.querySelectorAll('#kpis .metric')[0].textContent==='92.00%','Manual SLA formatting preserved with two decimals');
+  const baseline=stats().join('|');await upload('management.xlsx',xlsx);check(stats().join('|')===baseline,'CSV and XLSX management results match');
+  const zero=d.querySelector('[data-date="2026-10-04"]');zero.click();check(d.querySelector('#ziwo-summary .metric').textContent==='1,000','Manual exclusion is available but never automatic');
+  check(d.getElementById('comparison-coverage').textContent.startsWith('PARTIAL COVERAGE'),'Manual exclusion reflected in comparison coverage');
+  d.getElementById('ziwo-restore').click();change('ziwo-view','daily');change('ziwo-from','2026-10-01');
+  check(d.getElementById('comparison-periods').textContent.includes('2026-09-20 → 2026-09-30'),'Daily previous equivalent period has equal length');
+  check(d.querySelectorAll('#period-comparison tr')[3].children[3].textContent==='—','Missing baseline does not create invented volume change');
+  change('ziwo-view','weekly');check(d.getElementById('management-values').textContent.includes('77.09%'),'Weekly grouping preserves overall count-based management summary');
+  change('ziwo-view','mtd');check(d.documentElement.scrollWidth<=375,'Management and comparison responsive on mobile');
+  out.textContent=checks.join('\n')+`\nALL ${checks.length} MANAGEMENT CHECKS PASSED`;
+ }catch(e){out.textContent=checks.join('\n')+'\nFAIL: '+e.message;}
+});
+</script></body></html>

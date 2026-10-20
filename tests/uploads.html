@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Ziwo upload tests</title><link rel="icon" href="data:,"></head>
+<body><h1>Ziwo browser upload checks</h1><pre id="results">Running…</pre><iframe src="../index.html" title="Dashboard under test" style="width:375px;height:850px;border:1px solid #ddd"></iframe>
+<script>
+const frame = document.querySelector('iframe');
+frame.addEventListener('load', async () => {
+  const output = document.getElementById('results'), d = frame.contentDocument, w = frame.contentWindow, passed = [];
+  function check(value, name) { if (!value) throw new Error(name); passed.push('PASS: ' + name); output.textContent = passed.join('\n'); }
+  function metrics() { return [...d.querySelectorAll('#ziwo-summary .metric')].map(el => el.textContent); }
+  function change(id, value) { d.getElementById(id).value = value; d.getElementById(id).dispatchEvent(new Event('change', { bubbles: true })); }
+  async function waitFor(condition) { for (let i = 0; i < 200; i++) { if (condition()) return; await new Promise(resolve => setTimeout(resolve, 25)); } throw new Error('Upload did not complete in time'); }
+  async function upload(name, bytes, invalid = false) {
+    const transfer = new w.DataTransfer(); transfer.items.add(new w.File([bytes], name));
+    d.getElementById('ziwo-file').files = transfer.files;
+    d.getElementById('ziwo-file').dispatchEvent(new Event('change', { bubbles: true }));
+    await waitFor(() => invalid ? !d.getElementById('ziwo-error').hidden : d.getElementById('ziwo-status').textContent.includes('5 original'));
+    if (!invalid && !d.getElementById('ziwo-error').hidden) throw new Error(d.getElementById('ziwo-error').textContent);
+  }
+  try {
+    // Only these synthetic, bundled fixtures are fetched. Report imports themselves must make no network requests.
+    const [csv, xlsx] = await Promise.all([fetch('../samples/ziwo-inbound-sample.csv').then(r => r.text()), fetch('../samples/ziwo-inbound-sample.xlsx').then(r => r.arrayBuffer())]);
+    w.fetch = () => { throw new Error('Dashboard must not send uploaded data over the network'); };
+    w.XMLHttpRequest.prototype.send = () => { throw new Error('Dashboard must not send uploaded data over the network'); };
+    await upload('sample.csv', csv);
+    check(!d.getElementById('report-workspace').hidden, 'Upload opens report workspace');
+    check(metrics()[0] === '1,250', 'CSV offered count');
+    check(metrics()[1] === '1,130', 'CSV answered count');
+    check(metrics()[2] === '59', 'CSV abandoned count');
+    check(metrics()[6] === '261.9sec', 'CSV answered-weighted talk time');
+    check(metrics()[7] === '—sec', 'Full AHT unavailable');
+    const baseline = JSON.stringify(metrics());
+    const mismatchTable=w.Ziwo.parseCSV(csv);mismatchTable[3][2]='70%';
+    await upload('mismatch.csv',mismatchTable.map(row=>row.join(',')).join('\n'));
+    check(d.querySelector('input[data-date="2026-10-02"]').closest('tr').classList.contains('sla-mismatch'),'SLA discrepancy is highlighted');
+    check(d.querySelector('input[data-date="2026-10-02"]').closest('tr').querySelector('.reported-sla').textContent==='70.00%','Original Ziwo SLA stays unchanged');
+    check(d.getElementById('ziwo-comparison').textContent.startsWith('1 of 4'),'Daily discrepancy count shown');
+    check(JSON.stringify(metrics())===baseline,'Reported SLA differences never replace count-based overall SLA');
+    d.querySelector('[aria-label^="2026-10-02: Calculated SLA"]').dispatchEvent(new Event('focus'));
+    check(d.getElementById('ziwo-point').textContent.includes('−70.00 pp'),'Chart details show SLA gap in percentage points');
+    change('ziwo-formula','inbound-adjusted');check(d.getElementById('ziwo-formula-note').textContent.includes('1,224'),'Early-abandon exclusion is an explicit formula option');
+    check(metrics()[0]==='1,250'&&metrics()[2]==='59','SLA adjustment preserves offered and abandoned totals');
+    change('ziwo-formula','inbound');check(d.getElementById('ziwo-formula-note').textContent.includes('1,250'),'Default formula includes early abandoned calls');
+    const slashTable=w.Ziwo.parseCSV(csv);for(const row of slashTable.slice(1)){row[0]=row[0].split('-').reverse().join('/');}
+    await upload('dd-mm-yyyy.csv',slashTable.map(row=>row.join(',')).join('\n'));
+    check(JSON.stringify(metrics())===baseline,'DD/MM/YYYY upload matches ISO date report');
+    await upload('sample.csv',csv);
+    change('ziwo-from', '2026-10-01'); change('ziwo-through', '2026-10-02');
+    check(metrics()[3] === '9.00%', 'SLA from summed counts, not 45% daily mean');
+    check(metrics()[4] === '5.00%', 'Abandonment rate');
+    check(metrics()[5] === '90.00%', 'Answer rate');
+    check(metrics()[6] === '280.0sec', 'Weighted talk time across unequal volumes');
+    check(d.querySelectorAll('#ziwo-trend .trend-point').length === 4, 'Active zero-SLA day retained in both SLA series');
+    d.querySelector('[data-trend="talk"]').click();d.querySelector('#ziwo-trend .trend-point').dispatchEvent(new Event('focus'));
+    check(d.getElementById('ziwo-point').textContent.includes('100.00'), 'Keyboard-focus chart detail');
+    d.querySelector('[data-trend="volume"]').click();check(d.querySelectorAll('#ziwo-chart-legend .dot').length === 3, 'Call volume trend has three series');
+    d.querySelector('[data-trend="abandonment"]').click();check(d.querySelectorAll('#ziwo-trend .trend-point').length === 2, 'Abandonment chart renders');
+    const include = d.querySelector('[data-date="2026-10-02"]'); include.click();
+    check(metrics()[3] === '90.00%', 'Exclusion recalculates SLA');
+    check(metrics()[6] === '100.0sec', 'Exclusion recalculates weighted talk time');
+    check(d.getElementById('ziwo-excluded').textContent.includes('2026-10-02'), 'Excluded date displayed');
+    check(d.querySelectorAll('#ziwo-records tr').length === 5, 'Original rows preserved');
+    d.getElementById('ziwo-restore').click();check(metrics()[3] === '9.00%', 'Restore recalculates original results');
+    change('ziwo-view', 'mtd'); check(metrics()[0] === '1,000' && d.getElementById('ziwo-from').value === '2026-10-01', 'MTD uses first of month through cutoff');
+    change('ziwo-view', 'weekly'); change('ziwo-from', '2026-09-01');change('ziwo-through', '2026-10-31');
+    d.querySelector('[data-trend="sla"]').click();check(d.querySelectorAll('#ziwo-trend .trend-point').length === 2, 'Weekly Monday groups, no mean of reported SLA');
+    change('ziwo-view','daily');check(d.querySelectorAll('#ziwo-trend .trend-point').length === 8, 'Zero-volume future row omitted, four active days retained');
+    await upload('sample.xlsx', xlsx);
+    check(JSON.stringify(metrics()) === baseline, 'Real compressed XLSX matches CSV metrics');
+    check(d.getElementById('ziwo-sheet').value === '1', 'Auto-select matching report worksheet');
+    check(d.querySelectorAll('#ziwo-sheet option').length === 2, 'Worksheet selector available');
+    change('ziwo-sheet','0');await waitFor(()=>!d.getElementById('ziwo-error').hidden);
+    check(JSON.stringify(metrics()) === baseline, 'Invalid worksheet preserves prior valid analysis');
+    change('ziwo-sheet','1');await waitFor(()=>d.getElementById('ziwo-error').hidden);
+    const corrupt = new Uint8Array(xlsx.slice(0));const view = new DataView(corrupt.buffer);
+    for(let i=0;i<corrupt.length-46;i++){if(view.getUint32(i,true)===0x02014b50 && new TextDecoder().decode(corrupt.slice(i+46,i+46+view.getUint16(i+28,true)))==='xl/workbook.xml'){view.setUint32(i+16,view.getUint32(i+16,true)^1,true);break;}}
+    await upload('corrupt.xlsx',corrupt,true);check(d.getElementById('ziwo-error').textContent.includes('integrity'), 'XLSX corruption detected');
+    await upload('invalid.csv','Day,SLA\nnope,abc',true);check(d.getElementById('ziwo-error').textContent.includes('Missing required'), 'Missing headers show clear error');
+    check(JSON.stringify(metrics()) === baseline, 'Invalid upload preserves previous valid dataset');
+    await upload('legacy.xls','not a workbook',true);check(d.getElementById('ziwo-error').textContent.includes('not supported'), 'Unsupported file rejected');
+    await upload('oversize.csv',new Uint8Array(10*1024*1024+1),true);check(d.getElementById('ziwo-error').textContent.includes('10 MB'), 'File size limit enforced');
+    const sampleRow=w.Ziwo.parseCSV(csv)[2];const large=[w.Ziwo.COLUMNS,...Array.from({length:181},(_,i)=>{const row=sampleRow.slice();row[0]=w.Ziwo.shiftDate('2026-01-01',i);return row;})].map(row=>row.join(',')).join('\n');
+    // A different row count needs its own completion condition.
+    const largeTransfer=new w.DataTransfer();largeTransfer.items.add(new w.File([large],'large.csv'));d.getElementById('ziwo-file').files=largeTransfer.files;d.getElementById('ziwo-file').dispatchEvent(new Event('change',{bubbles:true}));
+    await waitFor(()=>d.getElementById('ziwo-status').textContent.includes('181 original'));
+    check(d.querySelectorAll('#ziwo-records tr').length===50,'Large reports paginate original rows');
+    d.getElementById('ziwo-next').click();check(d.getElementById('ziwo-page').textContent.includes('51–100'),'Next daily-record page');
+    check(d.getElementById('ziwo-chart-window').textContent.includes('181'),'Trend window retains final point');
+    d.getElementById('ziwo-chart-prev').click();check(d.getElementById('ziwo-chart-window').textContent.includes('91–180'),'Earlier trend points remain available');
+    await upload('sample.csv',csv);change('ziwo-from','2026-10-31');change('ziwo-through','2026-10-31');
+    check(metrics()[0]==='0'&&metrics()[3]==='—%'&&metrics()[6]==='—sec','Zero-volume-only selection is safe');
+    check(d.querySelectorAll('#ziwo-trend .trend-point').length===0,'No misleading trend points for empty period');
+    d.getElementById('ziwo-sample').click();check(d.getElementById('ziwo-error').hidden, 'Sample recovers from invalid upload');
+    const target=d.getElementById('target-aht');target.value='1';target.dispatchEvent(new Event('input',{bubbles:true}));
+    check(d.querySelectorAll('#ziwo-summary .kpi')[6].textContent.includes('Informational'), 'AHT target never applied to talk time');
+    d.getElementById('manual-tab').click();check(d.querySelector('#kpis .kpi:nth-child(2) .badge.bad'), 'Configurable AHT target applies to manual AHT');
+    target.value='260';target.dispatchEvent(new Event('input',{bubbles:true}));
+    d.getElementById('reset').click();check(d.querySelectorAll('#kpis .badge.neutral').length===4, 'Original manual Reset preserved');
+    d.getElementById('sample').click();check(d.querySelectorAll('#kpis .badge.good').length===3, 'Original manual sample preserved');
+    d.getElementById('report-tab').click();check(d.documentElement.scrollWidth<=375, 'Report mobile layout has no page overflow');
+    output.textContent=passed.join('\n')+`\nALL ${passed.length} ZIWO UPLOAD CHECKS PASSED`;
+  } catch(error) { output.textContent=passed.join('\n')+'\nFAIL: '+error.message; }
+});
+</script></body></html>

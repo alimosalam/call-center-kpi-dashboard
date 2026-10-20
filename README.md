@@ -20,7 +20,7 @@ Data stays in your current browser tab; it is not transmitted or saved. Refreshi
 | Abandonment rate | Abandoned ÷ offered × 100 | ≤ 5% |
 | Answer rate | Answered ÷ offered × 100 | Informational; no target |
 
-Green **On target** and orange **Needs attention** indicators use full precision; displayed values are rounded to one decimal. A number close to a target can therefore appear equal while missing it. A dash means there is no denominator or inputs need correcting.
+Green **On target** and orange **Needs attention** indicators use full precision; displayed rate values are rounded to exactly two decimals. A number close to a target can therefore appear equal while missing it. A dash means there is no denominator or inputs need correcting.
 
 Call counts must be non-negative whole numbers within JavaScript's safe integer range. Handling seconds may include decimals. Answered cannot exceed offered; SLA calls cannot exceed answered; answered plus abandoned cannot exceed offered. Handling time must be zero when no calls were answered. Blank, negative, non-finite, and unsafe numbers display an error and clear results until corrected.
 
@@ -67,3 +67,136 @@ python3 -m http.server 8000
 ```
 
 Open `http://localhost:8000/tests/browser.html`. Expect **ALL BROWSER TESTS PASSED**. These checks cover live updates, charts, targets, reset, sample data, zero/invalid inputs, and 375px mobile layout. Stop the server with Ctrl+C. The dashboard itself can be opened directly without this server.
+
+## Ziwo inbound reports
+
+Click **Upload Ziwo Report**, choose a `.csv` or `.xlsx` file, and the **Ziwo reports** workspace opens automatically. **Manual entry** returns to the original dashboard without losing its values. **Load Ziwo sample** generates a synthetic multi-week report with a real zero-SLA day and future zero-volume placeholders. Example upload files are included at `samples/ziwo-inbound-sample.csv` and `samples/ziwo-inbound-sample.xlsx`.
+
+All parsing and calculations run locally in the browser. Uploaded contents are never sent to GitHub, APIs, or remote storage. No spreadsheet library or CDN is used. No upload server is required: the self-contained `index.html` works on GitHub Pages, including project subpaths. Reloading clears the report, date exclusions, and target changes. Uploading another valid report or changing worksheets replaces the current dataset; an invalid upload leaves the previous valid analysis intact.
+
+### Required report columns
+
+The first row must contain these exact names (surrounding whitespace is trimmed); column order may vary, and extra columns are retained in the original row data:
+
+- Day
+- Inbound Calls
+- SLA
+- Abandoned Calls
+- Average Talk Time for Queue Calls
+- Answered Queue Calls
+- Calls landed in IVR
+- Calls landed in Queue
+- Average Waiting Time in Queue
+- Answered Calls Before SLA Threshold
+- Abandoned Calls Before SLA Threshold
+
+Use one row per date and export values, not formulas or a grand-total footer. Duplicate days are rejected to prevent double counting. Blank rows are ignored, but required values on nonblank rows may not be blank. Counts must be non-negative whole numbers and pass consistency checks (for example, answered plus abandoned may not exceed inbound). Unusual reports that violate these relationships require checking the source export rather than silently changing its values.
+
+### Report metric definitions
+
+| Metric | Calculation |
+| --- | --- |
+| Offered calls | Sum of Inbound Calls |
+| Answered calls | Sum of Answered Queue Calls |
+| Abandoned calls | Sum of Abandoned Calls |
+| Answer rate | Sum answered queue ÷ sum inbound × 100 |
+| Abandonment rate | Sum abandoned ÷ sum inbound × 100 |
+| Weighted Average Talk Time | Sum(daily average talk seconds × daily answered queue calls) ÷ sum answered queue calls |
+| Full AHT | Unavailable: the report does not include hold time and after-call work |
+
+IVR and queue counts are routing stages; they are not added to inbound calls. The answered metric is explicitly based on **Answered Queue Calls**, the answered count supplied by this report.
+
+**Overall SLA is configurable**, with a visible numerator and denominator:
+
+1. Default: sum answered before SLA ÷ sum inbound × 100.
+2. Queue basis: sum answered before SLA ÷ sum calls landed in queue × 100.
+3. Inbound excluding early abandons: sum answered before SLA ÷ (sum inbound calls − sum abandoned before SLA) × 100.
+4. Queue excluding early abandons: sum answered before SLA ÷ (sum queue calls − sum abandoned before SLA) × 100.
+
+Early abandoned calls are included by default. Only explicitly selecting one of the adjusted formulas removes them from the SLA denominator; all other volume/abandonment metrics keep them. Select the formula that matches your team's Ziwo configuration. The app does not assume that any one formula matches Ziwo's internal calculation. The original daily **Ziwo SLA (reported)** is retained in the daily table and shown alongside calculated SLA in daily trends. A daily comparison banner counts discrepancies in the included analysis dates. Highlighted daily cells show **calculated − reported SLA** in percentage points (pp); chart point details also show that gap. Differences beyond a 1e-9 pp floating-point tolerance are highlighted, including small gaps caused by Ziwo rounding. There is no averaged overall reported-SLA comparison. Weekly and overall SLA always use summed counts, never an arithmetic mean of daily percentages. A zero/invalid denominator produces a dash; an impossible denominator smaller than the numerator is flagged instead of clamped into a valid-looking percentage.
+
+Configurable default targets are SLA ≥ 90%, abandonment ≤ 5%, and full AHT ≤ 260 seconds. The AHT target changes the manual AHT indicator only. **It is never applied to Average Talk Time.** Target changes apply immediately and last only in the current tab. Invalid target edits leave the last valid targets active.
+
+### Views, trends, and exclusions
+
+- **Daily:** summaries cover the From–Through range; trend points represent individual active dates. Set From and Through to the same day for a single-day view.
+- **Weekly:** summaries cover that same range; trends group the included dates into Monday-start weeks. Partial boundary weeks contain only dates inside the selected range. All metrics are recalculated from counts/weights.
+- **Month-to-Date:** uses the first of the month of the Through date up to that cutoff. This supports historical MTD reports as well as the current month. The disabled From field shows the effective first day of the month.
+- Hover, tap, or keyboard-focus a chart point for exact values. Choose **SLA**, **Call volume**, **Abandonment**, or **Talk time**. Large exports paginate charts at 90 points and the original-data table at 50 rows; earlier/later controls expose every point/row.
+- All zero-volume days are automatically omitted from calculations and trends, including future placeholders. **A day with calls and 0% SLA stays included.** Zero-volume days remain in the original-data table.
+- Uncheck a date in **Daily records & exclusions** to omit it from every report summary and trend. Excluded dates are listed explicitly, including dates outside the current view. Switching views, formulas, or targets retains those exclusions. **Restore all dates** re-includes them. Original imported row objects are preserved and never edited by exclusions.
+
+The default range runs from the earliest imported date to the latest date with calls, so future zero rows do not move the cutoff. An entirely zero-volume report is valid and displays unavailable percentage/talk KPIs.
+
+### Accepted formats and limits
+
+CSV supports UTF-8 (with or without BOM), comma/semicolon/tab delimiters, CRLF or LF lines, and correctly quoted values. Valid thousands grouping such as `"1,200"` is accepted. Use a dot for decimal values; decimal commas and arbitrary text are rejected rather than guessed. SLA values are percentage points (`90`, `90.5`, or `90.5%`).
+
+Dates can be `YYYY-MM-DD` or slash/dash dates with the chosen **DD/MM/YYYY** or **MM/DD/YYYY** order. Choose that order before uploading; changing it reimports the file and resets exclusions. Invalid calendar dates are rejected. Duration cells accept numeric seconds, `MM:SS`, `HH:MM:SS` (including fractional seconds), or values such as `260 sec`.
+
+Standard XLSX workbooks are parsed using browser-native ZIP decompression and XML parsing. The app auto-selects a sheet with matching headers; the worksheet selector lets you choose another. Excel shared/inline strings, standard 1900/1904 date systems, percentage formats, and time-formatted duration fractions are supported. Plain numeric duration cells mean seconds; plain numeric SLA cells mean percentage points. Formula cells are deliberately rejected to avoid stale cached values. Export values only. Excel errors, encrypted files, legacy `.xls`, multipart/ZIP64 archives, and unsupported compression are rejected with a message. ZIP components read by the parser are size- and CRC-checked.
+
+Limits: 10 MB uploaded file, 20,000 daily records, 30 worksheets, 256 columns, 2,000 ZIP entries, and 50 MB total expanded workbook content. Use a current browser with `DecompressionStream('deflate-raw')` support for XLSX; otherwise use CSV. No browser add-on, API key, server, or runtime package installation is needed.
+
+### Additional source files and verification
+
+- `ziwo.js`: CSV parsing, row validation, report formulas, grouping, exclusions, sample generation.
+- `xlsx-reader.js`: dependency-free native XLSX reader.
+- `ziwo-ui.js`: file selection, report controls, summaries, accessible interactive SVG charts, daily records.
+- `tests/ziwo.test.js`: report calculations and validation regressions.
+- `tests/uploads.html`: actual CSV/XLSX file-input browser tests using bundled synthetic fixtures.
+
+Run `node scripts/embed-assets.js` after changing any source JS/CSS, then run `node --test tests/*.test.js` and `node scripts/embed-assets.js --check`.
+
+Serve the project as described above and open `/tests/uploads.html` on that local server. It should report **ALL 52 ZIWO UPLOAD CHECKS PASSED**; `/tests/browser.html` verifies the original manual workflow. Browser tests use only bundled synthetic samples and simulate file selection; they never upload contents to a server. Additional development checks covered shared-string XLSX, the 1904 date system, formula rejection, zero-SLA retention, responsive widths from 320px to 1440px, and no application network requests during import.
+
+## Data Quality, reconciliation, and daily Excel export
+
+The report workspace now includes **Data quality**. Its date/drop checks inspect original records inside the selected analysis range, *before* manual date exclusions:
+
+- **Missing dates** are absent calendar dates within that range, listed as dates or contiguous ranges. Missing dates are never filled with invented zero-call rows. Leading/trailing gaps count if you explicitly extend the date range.
+- **Zero-call days** are known report rows with zero offered calls. They remain distinct from missing dates, and future placeholders are identified. The section also notes the total zero-call dates in the original report.
+- **Invalid rows / structure** lists validation issues from the most recent rejected file, with row numbers and column messages where available. It shows the first issue for each invalid row and collects issues across rows. No partial invalid file is accepted. If a previous valid report is loaded, its analysis is retained and clearly labeled separately from the rejected upload.
+- **Unusual SLA drops** default to decreases of at least **10 percentage points** in either calculated or reported SLA versus the previous active observation. A calendar gap between observations is disclosed. This threshold is configurable; a flagged drop is a prompt to review, not proof of a bad report.
+
+**SLA reconciliation** defaults to a significant gap of **at least 1 percentage point**, using the absolute value of calculated SLA minus original Ziwo SLA. It lists affected dates and provides a button to show those dates in the daily table. Both values and the signed difference remain visible per day. Significant records show the answered-before-SLA numerator, selected denominator, inbound/queue counts, and early abandons to help investigate.
+
+For investigation, the app checks all available count-based formulas against the original daily percentage. A match within 0.005 pp is labeled a possible formula explanation, never confirmation of Ziwo's configuration. Small gaps of at most 0.005 pp may reflect two-decimal rounding, but the original source precision must be checked. Unexplained gaps explicitly request checking Ziwo's SLA threshold, denominator, and reporting scope. The app does not silently change formulas, original reported percentages, or early-abandon inclusion.
+
+The new **filtered daily performance** table contains Offered, Answered, Abandoned, calculated SLA, original Ziwo SLA, signed SLA difference, Abandonment Rate, and Talk Time. Calculated SLA below the configured minimum (90% default) and abandonment above the configured maximum (5% default) are highlighted with text as well as color. Exact boundaries pass. Filter to all included dates, target breaches, or significant SLA discrepancies. This additional filter affects the daily table and its export; the overall KPI cards and trends continue to use the selected range and date exclusions. Original records and exclusion controls remain available separately.
+
+Click **Export filtered table to Excel** to download a genuine `.xlsx` workbook generated in the browser. It contains **all** matching dates across every table page, not just visible rows, plus an **Analysis Settings** sheet with the date range, table filter, selected formula, current targets, and excluded dates. Numeric percentages are stored as percentage points (90 means 90%), with headers that identify the units. Target-breach rows are highlighted. Full AHT cells are blank and the settings sheet explains the missing hold/after-call-work data. The export never estimates Full AHT, sends data to a server, or executes user text as spreadsheet formulas. Empty tables and invalid date ranges disable export.
+
+Additional files:
+
+- `ziwo-review.js`: multi-row validation diagnostics, missing/zero dates, SLA drops, reconciliation, daily results, and export data.
+- `xlsx-writer.js`: local, dependency-free OOXML/ZIP workbook generation with literal text cells, numeric metrics, frozen headers, and filters.
+- `tests/review.test.js`: quality, reconciliation, daily target, and workbook regression tests.
+- `tests/review.html`: 33 browser checks covering these sections, exclusions, target boundaries, filters, and all-page export.
+
+Current validation: **37 Node tests**, **17 original dashboard browser checks**, **52 upload browser checks**, and **33 review browser checks**. A downloaded workbook was independently opened with Python/openpyxl to verify rows, numeric metrics, blank Full AHT, target colors, and Excel structure. No Python dependency is needed to use the app or its export. The native browser tests can be run at `/tests/browser.html`, `/tests/uploads.html`, and `/tests/review.html` on the local test server.
+
+The development workspace cannot read a report held only in someone else's Web Preview browser tab. The saved sample CSV/XLSX files and explicitly synthetic variations were used for development tests. Refresh the preview and select your own report again to run the new data quality and reconciliation checks on it locally. No private report contents need to be sent to the development server or chat.
+
+## Management review refinements
+
+All displayed SLA, abandonment, answer-rate, and SLA-gap values now use **exactly two decimal places**, including cards, daily records, reconciliation, charts, comparison, manual entry results, and Excel display formats. Calculations, flags, and original values retain full precision: a small underlying difference can display `0.00 pp`, and a rounded target value can still miss the target. `dashboard-format.js` supplies the shared formatting. Excel stores unrounded numeric rates in percentage-point units and formats the relevant columns as `0.00` even on highlighted rows.
+
+Dates with **Offered > 0 and Answered = 0** have a clear warning in Data Quality, original records, filtered daily performance, the management summary, and Excel status text. They stay included in offered counts and SLA/rate denominators unless manually excluded. Their Average Talk Time is unavailable when there are no answered calls; Full AHT remains unavailable for every report row.
+
+**October 4 and October 11, 2026** are explicit requested investigation dates. They appear as review flags when they fall in the selected range, alongside automatically detected drops. If a date is missing or has no active calls, the dashboard says a drop cannot be confirmed. A requested flag does not invent a drop, alter data, or exclude a date. Automatic drops compare the calculated and reported SLA series independently against their preceding active observations. Data Quality inspects original dates before exclusions; the performance table evaluates included dates.
+
+The **management summary** shows count-based overall SLA, target status and percentage-point gap, abandonment rate, answered-weighted Average Talk Time, included active days below the SLA target and above the abandonment target, and data-quality warnings. It never aggregates reported daily SLA by averaging or estimates Full AHT.
+
+The expandable **previous-period comparison** uses the same selected SLA formula and respects absolute-date manual exclusions in both periods:
+
+- Daily and Weekly: immediately preceding calendar interval with the same inclusive number of days as From–Through. Weekly display grouping does not change that range.
+- Month-to-Date: previous calendar month from day 1 through the same day-of-month cutoff, capped at that month's end. The displayed date ranges and calendar-day counts make any shorter prior month explicit.
+- Rates show **selected minus previous in percentage points**. Call volumes show **(selected − previous) ÷ previous × 100**.
+- Missing dates and exclusions are disclosed for each interval. Partial-period comparisons use observed included data only; missing dates are never assumed to be zero. Missing prior data, zero prior volume, or unavailable rate denominators produce a dash rather than an invented/infinite change. Upload a longer source report if the baseline is not included.
+
+SLA reconciliation preserves both daily values, shows their signed gap, explains the numerator/denominator used by the dashboard, and checks alternatives as hypotheses. It cannot establish Ziwo's internal formula or configured threshold from these columns alone. No formula is automatically selected to force the numbers to match.
+
+New synthetic review fixtures `samples/ziwo-management-sample.csv` and `.xlsx` include September/October comparison coverage, zero answers on October 4, and separate reported/calculated SLA drops on October 11. They contain demonstration data, not a real team's report. For a complete sample comparison, upload either file and select **Month-to-Date**, through `2026-10-11`.
+
+Verification now includes **46 Node tests**, the existing **102 browser checks**, and **26 management browser checks** at `/tests/management.html`. Additional checks independently opened the downloaded Excel file to verify two-decimal number formats, retained zero-answer rows, warning text, and blank Full AHT. Responsive layouts were checked from 320px to 1440px; report processing and export made no application network requests. All changes remain compatible with the standalone HTML preview and static GitHub Pages project paths.
