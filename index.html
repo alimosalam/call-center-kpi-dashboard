@@ -20,6 +20,7 @@
 .review-panel{margin-top:20px}.review-panel>.section-heading>label{min-width:180px;max-width:220px}.review-panel input{font-size:15px}.quality-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.quality-card{background:#f6f9fb;border:1px solid var(--border);border-radius:8px;padding:16px}.quality-card strong{display:block;font-size:28px;margin:10px 0;color:var(--navy)}.quality-card p{font-size:11px;line-height:1.6;margin:0;color:var(--muted)}.quality-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}.review-panel details{font-size:12px;line-height:1.7}.review-panel summary{font-weight:600;cursor:pointer}.review-panel ul{padding-left:20px;max-height:240px;overflow:auto;overflow-wrap:anywhere;color:#536a78;font-size:12px;line-height:1.8}.review-panel li{margin-bottom:7px}#quality-invalid{margin-top:18px;border-top:1px solid var(--border);padding-top:16px}#quality-invalid h3{color:var(--bad)}#show-discrepancies{margin-top:14px}.performance-toolbar{display:flex;align-items:center;gap:24px;flex-wrap:wrap}.performance-toolbar label{min-width:250px}.performance-toolbar .helper{flex:1;min-width:200px}.target-breach{background:#fff0e9!important;color:#a13f2d!important;font-weight:700}.significant-gap{background:#fff1da;color:#845017;font-weight:700}.sla-mismatch .calculated-sla.target-breach{border-left:3px solid #d76c56}#reconciliation-dates{overflow-wrap:anywhere}
 @media(max-width:900px){.quality-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.quality-details{grid-template-columns:minmax(0,1fr)}}@media(max-width:650px){.review-panel>.section-heading>label{max-width:none;width:100%}.performance-toolbar label{width:100%;min-width:0}.quality-grid{gap:10px}.quality-card{padding:12px}.quality-card h3{min-height:36px}.performance-toolbar{gap:0}#export-performance{width:100%}}
 .management-panel{margin-top:20px}.management-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.management-stat{padding:15px;background:#f5f9fa;border:1px solid var(--border);border-radius:8px}.management-stat strong{display:block;font-size:23px;margin-top:12px;overflow-wrap:anywhere}.management-stat h3{min-height:34px}.management-panel summary{font-size:13px;font-weight:650;cursor:pointer}.coverage-warning{background:#fff1da;color:#845017}.management-panel .point-detail{line-height:1.8}@media(max-width:900px){.management-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:370px){.management-grid{grid-template-columns:minmax(0,1fr)}}
+.approval-panel,.simulation-panel{margin-top:22px}.simulation-panel{border:2px dashed #b78b45;background:#fffcf6}.simulation-panel .eyebrow{color:#91621e}.simulation-panel h3.impact-heading{margin-top:20px;margin-bottom:12px}.simulation-panel>.report-kpis{margin-top:20px}.approval-panel textarea{display:block;min-width:240px;max-width:100%;width:100%;border:1px solid #d8e1e8;border-radius:6px;padding:10px;font:12px system-ui;color:var(--navy);resize:vertical}.approval-panel select{min-width:170px}.approval-panel input[type=checkbox]{width:18px;height:18px;accent-color:var(--teal)}.approval-panel button{white-space:nowrap}.approval-panel .table-scroll{max-height:440px}
 
 </style>
 <!-- END EMBEDDED STYLES -->
@@ -44,7 +45,7 @@
         <div class="section-heading"><div><p class="eyebrow">REPORT HEALTH</p><h2 id="quality-title">Data quality</h2><p id="quality-scope"></p></div><label for="quality-drop">Unusual SLA drop (pp)<input id="quality-drop" type="number" min="0.01" max="100" step="any" value="10"></label></div>
         <div id="quality-cards" class="quality-grid"></div>
         <p id="quality-setting-error" class="error" role="alert" hidden></p>
-        <div class="quality-details"><details><summary>Missing dates</summary><p class="helper">Absent calendar dates are gaps, not assumed zero-call days. Known zero-call rows are not missing.</p><ul id="quality-missing"></ul></details><details><summary>Zero-call dates</summary><ul id="quality-zero"></ul></details><details><summary>Zero answered-call warnings</summary><ul id="quality-no-answers"></ul></details><details><summary>Investigation flags · including October 4 &amp; 11, 2026</summary><ul id="quality-investigation"></ul></details><details><summary>Unusual SLA drops</summary><p class="helper">Compares consecutive active dates in the original selected range, including manually excluded dates. A gap between observations is shown explicitly; this is a review signal, not proof of a reporting error.</p><ul id="quality-drops"></ul></details></div>
+        <div class="quality-details"><details><summary>Missing dates</summary><p class="helper">Absent calendar dates are gaps, not assumed zero-call days. Known zero-call rows are not missing.</p><ul id="quality-missing"></ul></details><details><summary>Zero-call dates</summary><ul id="quality-zero"></ul></details><details><summary>Zero answered-call warnings</summary><ul id="quality-no-answers"></ul></details><details><summary>Investigation flags · including October 4 &amp; 11, 2026</summary><ul id="quality-investigation"></ul></details><details><summary>Unusual SLA drops</summary><p class="helper">Compares consecutive active dates in the original selected range, including proposed simulation dates. A gap between observations is shown explicitly; this is a review signal, not proof of a reporting error.</p><ul id="quality-drops"></ul></details></div>
         <div id="quality-invalid" hidden><h3>Latest upload validation issues</h3><p id="quality-invalid-source" class="helper"></p><ul id="quality-issues"></ul><p class="helper">A rejected report never replaces the previous valid analysis. Each invalid row shows its first validation issue; no partial report is silently accepted.</p></div>
       </section>
       <div id="report-content" hidden>
@@ -59,14 +60,16 @@
           <p id="ziwo-formula-note" class="helper"></p><p class="helper">Early abandoned calls are included by default. The explicitly adjusted formulas exclude them from the SLA denominator only; offered, answered, and abandonment metrics remain unchanged.</p>
           <details class="target-settings"><summary>Configure performance targets</summary><div class="target-fields"><label for="target-sla">SLA minimum (%)<input id="target-sla" type="number" min="0" max="100" step="any" value="90.00"></label><label for="target-abandonment">Abandonment maximum (%)<input id="target-abandonment" type="number" min="0" max="100" step="any" value="5.00"></label><label for="target-aht">Full AHT maximum (sec)<input id="target-aht" type="number" min="0" step="any" value="260"></label></div><p class="helper">AHT target applies to the manual dashboard only. Average Talk Time does not include hold time or after-call work, so it has no AHT target.</p><p id="target-error" class="error" role="alert" hidden></p></details>
         </section>
-        <div class="results-heading"><h2>Report performance</h2><span id="ziwo-range"></span></div>
+        <section class="panel approval-panel" aria-labelledby="approval-title"><p class="eyebrow">EXCLUSION APPROVAL MANAGEMENT</p><h2 id="approval-title">Client decisions &amp; proposed exclusions</h2><p class="helper">October 4 and 11, 2026 start as Pending Approval. Official KPIs include every valid day in the reporting range. A manually recorded status is not proof of client approval and never changes official results. Use simulation selections to assess proposals only.</p><p class="helper">Records stay in this tab, are editable only by you, and are included in Excel exports. Loading another valid report resets records to Pending Approval; refresh clears them. Save draft changes explicitly before exporting.</p><div class="table-scroll"><table><caption>Flagged dates and manually controlled approval records. Missing dates are identified; they are never fabricated.</caption><thead><tr><th scope="col">Date</th><th scope="col">Report presence</th><th scope="col">Recorded status</th><th scope="col">Reason</th><th scope="col">Simulation exclusion</th><th scope="col">Save record</th></tr></thead><tbody id="approval-records"></tbody></table></div><p id="approval-feedback" class="helper" role="status"></p></section>
+        <div class="results-heading"><h2>Official Performance</h2><span id="ziwo-range"></span></div>
         <div id="ziwo-summary" class="report-kpis" aria-live="polite"></div>
+        <section class="panel simulation-panel" aria-labelledby="adjusted-title"><p class="eyebrow">SIMULATION ONLY · NOT OFFICIAL</p><h2 id="adjusted-title">Adjusted Performance</h2><p id="simulation-scope" class="helper"></p><div id="adjusted-kpis" class="report-kpis" aria-live="polite"></div><h3 class="impact-heading">Management summary · proposed exclusion impact</h3><div class="table-scroll"><table><thead><tr><th scope="col">Metric</th><th scope="col">Official Performance</th><th scope="col">Adjusted Performance · simulation</th><th scope="col">Simulated impact (pp)</th></tr></thead><tbody id="approval-impact"></tbody></table></div><p class="helper">Impact = simulated adjusted minus official. The selected SLA formula is identical in both views. Original Ziwo SLA values remain unchanged. Full AHT is unavailable in both views. Simulation export contains all adjusted active dates, independent of the official table filter.</p><button id="export-adjusted" type="button" class="secondary">Export adjusted simulation to Excel</button><p id="simulation-export-status" class="helper" role="status"></p></section>
         <div id="ziwo-comparison" class="sla-comparison" role="status"></div>
         <section class="panel review-panel" aria-labelledby="reconciliation-title"><div class="section-heading"><div><p class="eyebrow">SLA RECONCILIATION</p><h2 id="reconciliation-title">Understand the differences</h2><p>Calculated SLA and original Ziwo SLA may use different formulas. Values display two decimals; unrounded differences drive flags, so a tiny flagged gap may display 0.00 pp. No averages of daily SLA percentages.</p></div><label for="sla-significant">Significant gap (absolute pp)<input id="sla-significant" type="number" min="0.01" max="100" step="any" value="1"></label></div><p id="reconciliation-setting-error" class="error" role="alert" hidden></p><p id="reconciliation-summary" class="point-detail" role="status"></p><p id="reconciliation-dates" class="helper"></p><details><summary>Possible explanations for significant gaps</summary><ul id="reconciliation-explanations"></ul><p class="helper">An alternative formula matching within half a two-decimal display step is a hypothesis to check with Ziwo. These counts cannot establish Ziwo’s configured threshold or internal reporting scope. Your chosen formula and original SLA values are never changed automatically.</p></details><button id="show-discrepancies" class="secondary" type="button">Show significant dates in daily table</button></section>
         <div class="insight report-notice"><div><h2>Talk time is not full AHT</h2><p>Weighted talk time = Σ(daily average talk seconds × answered queue calls) ÷ Σ(answered queue calls). This report does not contain full handling time. AHT is unavailable here, and the AHT target is not applied to talk time.</p></div></div>
-        <section class="panel report-trends" aria-labelledby="ziwo-trend-heading"><div class="section-heading"><div><h2 id="ziwo-trend-heading">Performance trends</h2><p>Hover, focus, or tap a point to inspect it. Weekly results use summed counts and weighted talk time.</p></div></div><div class="trend-controls" role="group" aria-label="Trend metric"><button type="button" data-trend="sla" aria-pressed="true">SLA</button><button type="button" data-trend="volume" class="secondary" aria-pressed="false">Call volume</button><button type="button" data-trend="abandonment" class="secondary" aria-pressed="false">Abandonment</button><button type="button" data-trend="talk" class="secondary" aria-pressed="false">Talk time</button></div><div id="ziwo-chart-legend" class="chart-legend"></div><div class="trend-scroll"><svg id="ziwo-trend" viewBox="0 0 900 250" role="group" aria-label="Interactive performance trend"></svg></div><p id="ziwo-point" class="point-detail" role="status"></p></section>
-        <section class="panel report-table-panel" aria-labelledby="performance-title"><div class="section-heading"><div><p class="eyebrow">DAILY PERFORMANCE</p><h2 id="performance-title">Your filtered daily results</h2><p>Includes the selected range and date exclusions. Days with no calls remain in original records below.</p></div><button id="export-performance" type="button">Export filtered table to Excel</button></div><div class="performance-toolbar"><label for="performance-filter">Show rows<select id="performance-filter"><option value="all">All included active dates</option><option value="attention">Target breaches &amp; investigation warnings</option><option value="discrepancies">Significant SLA discrepancies</option></select></label><p id="performance-scope" class="helper"></p></div><div class="table-scroll"><table><caption>Filtered daily performance. Percentages and percentage-point differences use the selected SLA formula. Talk Time is not Full AHT.</caption><thead><tr><th scope="col">Day</th><th scope="col">Offered</th><th scope="col">Answered</th><th scope="col">Abandoned</th><th scope="col">Calculated SLA</th><th scope="col">Ziwo SLA</th><th scope="col">SLA gap (pp)</th><th scope="col">Abandonment rate</th><th scope="col">Talk time (sec)</th><th scope="col">Performance</th></tr></thead><tbody id="performance-records"></tbody></table></div><div class="table-pagination"><button id="performance-prev" class="secondary" type="button">Previous</button><span id="performance-page"></span><button id="performance-next" class="secondary" type="button">Next</button></div><p id="performance-export-status" class="helper" role="status"></p><p class="helper">Export downloads a real .xlsx workbook locally with all filtered dates across every page, current targets, selected formula, date range, and exclusions. Full AHT cells stay blank because the required handling data is unavailable.</p></section>
-        <section class="panel report-table-panel" aria-labelledby="ziwo-daily-heading"><div class="section-heading"><div><h2 id="ziwo-daily-heading">Daily records &amp; exclusions</h2><p>Original values are preserved. Uncheck a date to exclude it from all report calculations and trends.</p></div><button id="ziwo-restore" class="secondary" type="button">Restore all dates</button></div><p id="ziwo-excluded" class="exclusion-summary" aria-live="polite"></p><p id="ziwo-zero-note" class="helper"></p><div class="table-scroll"><table><caption>Original daily Ziwo values and calculated results. All imported dates remain available, including those outside the analysis range.</caption><thead><tr><th scope="col">Include</th><th scope="col">Day</th><th scope="col">Inbound / offered</th><th scope="col">Answered queue</th><th scope="col">Abandoned</th><th scope="col">Ziwo SLA (reported)</th><th scope="col">SLA (calculated)</th><th scope="col">SLA difference (pp)</th><th scope="col">Abandonment rate</th><th scope="col">Avg talk (sec)</th><th scope="col">Status</th></tr></thead><tbody id="ziwo-records"></tbody></table></div><div class="table-pagination"><button id="ziwo-prev" class="secondary" type="button">Previous</button><span id="ziwo-page"></span><button id="ziwo-next" class="secondary" type="button">Next</button></div><p class="helper">Offered = Inbound Calls; Answered = Answered Queue Calls. IVR and queue counts are routing stages and are not added to inbound calls. Ziwo-reported SLA is retained exactly as a percentage; it is never averaged to obtain an overall SLA.</p></section>
+        <section class="panel report-trends" aria-labelledby="ziwo-trend-heading"><div class="section-heading"><div><h2 id="ziwo-trend-heading">Official performance trends</h2><p>Hover, focus, or tap a point to inspect it. Weekly results use summed counts and weighted talk time.</p></div></div><div class="trend-controls" role="group" aria-label="Trend metric"><button type="button" data-trend="sla" aria-pressed="true">SLA</button><button type="button" data-trend="volume" class="secondary" aria-pressed="false">Call volume</button><button type="button" data-trend="abandonment" class="secondary" aria-pressed="false">Abandonment</button><button type="button" data-trend="talk" class="secondary" aria-pressed="false">Talk time</button></div><div id="ziwo-chart-legend" class="chart-legend"></div><div class="trend-scroll"><svg id="ziwo-trend" viewBox="0 0 900 250" role="group" aria-label="Interactive performance trend"></svg></div><p id="ziwo-point" class="point-detail" role="status"></p></section>
+        <section class="panel report-table-panel" aria-labelledby="performance-title"><div class="section-heading"><div><p class="eyebrow">DAILY PERFORMANCE</p><h2 id="performance-title">Official daily performance</h2><p>Official results include all valid active dates in the selected range. Simulation exclusions never alter this table. Zero-call rows remain in original records below.</p></div><button id="export-performance" type="button">Export official table to Excel</button></div><div class="performance-toolbar"><label for="performance-filter">Show rows<select id="performance-filter"><option value="all">All included active dates</option><option value="attention">Target breaches &amp; investigation warnings</option><option value="discrepancies">Significant SLA discrepancies</option></select></label><p id="performance-scope" class="helper"></p></div><div class="table-scroll"><table><caption>Filtered daily performance. Percentages and percentage-point differences use the selected SLA formula. Talk Time is not Full AHT.</caption><thead><tr><th scope="col">Day</th><th scope="col">Offered</th><th scope="col">Answered</th><th scope="col">Abandoned</th><th scope="col">Calculated SLA</th><th scope="col">Ziwo SLA</th><th scope="col">SLA gap (pp)</th><th scope="col">Abandonment rate</th><th scope="col">Talk time (sec)</th><th scope="col">Performance</th></tr></thead><tbody id="performance-records"></tbody></table></div><div class="table-pagination"><button id="performance-prev" class="secondary" type="button">Previous</button><span id="performance-page"></span><button id="performance-next" class="secondary" type="button">Next</button></div><p id="performance-export-status" class="helper" role="status"></p><p class="helper">Official export downloads all filtered official dates across every page with targets, formula, date range, and a separate approval-record sheet. Simulation export is separate and labeled. Full AHT cells stay blank because the required handling data is unavailable.</p></section>
+        <section class="panel report-table-panel" aria-labelledby="ziwo-daily-heading"><div class="section-heading"><div><h2 id="ziwo-daily-heading">Daily records &amp; exclusions</h2><p>Original values are preserved. Uncheck a date to propose an exclusion for the adjusted simulation only. Official KPI cards, charts, tables, and comparisons remain unchanged.</p></div><button id="ziwo-restore" class="secondary" type="button">Restore simulation dates</button></div><p id="ziwo-excluded" class="exclusion-summary" aria-live="polite"></p><p id="ziwo-zero-note" class="helper"></p><div class="table-scroll"><table><caption>Original daily Ziwo values and calculated results. All imported dates remain available, including those outside the analysis range.</caption><thead><tr><th scope="col">Include in simulation</th><th scope="col">Day</th><th scope="col">Inbound / offered</th><th scope="col">Answered queue</th><th scope="col">Abandoned</th><th scope="col">Ziwo SLA (reported)</th><th scope="col">SLA (calculated)</th><th scope="col">SLA difference (pp)</th><th scope="col">Abandonment rate</th><th scope="col">Avg talk (sec)</th><th scope="col">Status</th></tr></thead><tbody id="ziwo-records"></tbody></table></div><div class="table-pagination"><button id="ziwo-prev" class="secondary" type="button">Previous</button><span id="ziwo-page"></span><button id="ziwo-next" class="secondary" type="button">Next</button></div><p class="helper">Offered = Inbound Calls; Answered = Answered Queue Calls. IVR and queue counts are routing stages and are not added to inbound calls. Ziwo-reported SLA is retained exactly as a percentage; it is never averaged to obtain an overall SLA.</p></section>
       </div>
     </div>
     <div id="manual-workspace">
@@ -482,6 +485,37 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
 
 </script>
 <script>
+(function(root){
+ 'use strict';
+ const Z=typeof module!=='undefined'&&module.exports?require('./ziwo.js'):root.Ziwo;
+ const R=typeof module!=='undefined'&&module.exports?require('./ziwo-review.js'):root.ZiwoReview;
+ const STATUSES=Object.freeze(['Pending Approval','Approved','Rejected']);
+ function flaggedDates(rows,dropThreshold=10,formula='inbound'){
+  const dates=new Set(R.REVIEW_DATES);
+  if(rows.length){const q=R.dataQuality(rows,{from:rows[0].date,through:rows.at(-1).date,dropThreshold,formula});for(const item of q.investigation)dates.add(item.date);}
+  return [...dates].sort();
+ }
+ function record(status='Pending Approval',reason=''){
+  if(!STATUSES.includes(status))throw Error('Choose Pending Approval, Approved, or Rejected.');
+  if(typeof reason!=='string'||reason.length>2000)throw Error('Reason must be text of at most 2,000 characters.');
+  return Object.freeze({status,reason});
+ }
+ function performance(rows,options,proposed=[]){
+  // Approval labels and simulation selections are deliberately not official exclusion inputs.
+  const official=Z.analyze(rows,{...options,excluded:[]});
+  const adjusted=Z.analyze(rows,{...options,excluded:[...proposed]});
+  const gap=key=>official.summary[key]===null||adjusted.summary[key]===null?null:adjusted.summary[key]-official.summary[key];
+  return {official,adjusted,impact:{sla:gap('sla'),abandonment:gap('abandonment')},proposed:[...proposed].sort()};
+ }
+ function exportSheets(records,proposed,scope){
+  return {name:'Exclusion Approval Records',rows:[['Date','Manually Recorded Status','Reason','Proposed Simulation Exclusion','Official Inclusion','Record Meaning'],...[...records].sort(([a],[b])=>a.localeCompare(b)).map(([date,item])=>[date,item.status,item.reason,proposed.has(date)?'Yes':'No','Included if present and inside reporting range','User-entered record only; status is not proof of client approval.']),['Export Scope',scope],['Official Policy','All valid dates remain included. This version does not apply approval records or simulation selections to official KPIs.'],['Simulation Policy','Adjusted results are hypothetical; selections may include pending or rejected proposals and must not be presented as official.']]};
+ }
+ root.ZiwoApprovals={STATUSES,flaggedDates,record,performance,exportSheets};
+ if(typeof module!=='undefined'&&module.exports)module.exports=root.ZiwoApprovals;
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+</script>
+<script>
 (function (root) {
   'use strict';
   // Small, local OOXML reader: no dependencies, network requests, formula evaluation, or macros.
@@ -676,7 +710,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
 (function () {
   'use strict';
   const z = id => document.getElementById(id);
-  const state = { rows: [], excluded: new Set(), workbook: null, source: '', metric: 'sla', page: 0, chartPage: 0, ticket: 0, lastFile: null, rangeFrom: '', validation: null, analysis: null, performancePage: 0, performance: [], dropThreshold: 10, discrepancyThreshold: 1 };
+  const state = { rows: [], excluded: new Set(), workbook: null, source: '', metric: 'sla', page: 0, chartPage: 0, ticket: 0, lastFile: null, rangeFrom: '', validation: null, analysis: null, performancePage: 0, performance: [], dropThreshold: 10, discrepancyThreshold: 1, approvals: new Map(), approvalDates: [] };
   const PAGE = 50, CHART_PAGE = 90;
   const delta = DashboardFormat.pp;
   const rate = DashboardFormat.fixed;
@@ -696,6 +730,9 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     Ziwo.aggregate(rows);
     state.validation = null; state.performancePage = 0;
     state.rows = rows; state.source = source; state.excluded = new Set(); state.page = 0;
+    state.approvals = new Map(); state.approvalDates = []; z('approval-records').replaceChildren();
+    syncApprovalDates();
+    z('approval-feedback').textContent = '';
     state.rangeFrom = rows[0].date;
     z('ziwo-from').value = rows[0].date;
     const active = rows.filter(Ziwo.hasVolume);
@@ -756,7 +793,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     ++state.ticket; state.lastFile = null; state.workbook = null; z('ziwo-sheet-label').hidden = true;
     setRows(Ziwo.normalizeRows(Ziwo.sampleTable(today())), 'Ziwo sample · synthetic demonstration data');
   });
-  const settings = () => ({ from: z('ziwo-from').value, through: z('ziwo-through').value, view: z('ziwo-view').value, formula: z('ziwo-formula').value, excluded: [...state.excluded] });
+  const settings = () => ({ from: z('ziwo-from').value, through: z('ziwo-through').value, view: z('ziwo-view').value, formula: z('ziwo-formula').value, excluded: [] });
   function card(title, value, unit, note, good) {
     const color = good === null || good === undefined ? 'info' : good ? 'good' : 'bad';
     const badge = good === null || good === undefined ? 'Informational' : good ? 'On target' : 'Needs attention';
@@ -771,6 +808,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
       if (!options.through || (options.view !== 'mtd' && (!options.from || options.from > options.through))) throw new Error('Choose valid From and Through dates, with From no later than Through.');
       analysis = Ziwo.analyze(state.rows, options);
     } catch (e) {
+      z('adjusted-kpis').replaceChildren(); z('approval-impact').replaceChildren(); z('simulation-scope').textContent = 'Choose a valid reporting range.'; z('export-adjusted').disabled = true;
       state.analysis = null; state.performance = []; z('export-performance').disabled = true; z('performance-records').replaceChildren(); z('performance-scope').textContent = 'Correct the date range to display and export results.';
       z('management-values').replaceChildren(); z('period-comparison').replaceChildren(); z('management-warnings').textContent = 'Choose a valid reporting range.';
       z('quality-scope').textContent = 'Quality checks paused: choose a valid date range. Original report data is still retained.'; z('quality-cards').replaceChildren();
@@ -810,6 +848,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     renderReview(analysis);
     renderPerformance(analysis);
     renderManagement(analysis);
+    syncApprovalDates(); renderApprovalRecords(); renderAdjusted();
   }
   for (const id of ['ziwo-from', 'ziwo-through', 'ziwo-view', 'ziwo-formula']) z(id).addEventListener('change', () => {
     if (id === 'ziwo-from') state.rangeFrom = z('ziwo-from').value;
@@ -825,7 +864,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
   });
   function renderTable(analysis) {
     const excluded = [...state.excluded].sort();
-    z('ziwo-excluded').textContent = excluded.length ? `Manually excluded (${excluded.length}): ${excluded.join(', ')}. Original rows are retained below.` : 'No dates manually excluded.';
+    z('ziwo-excluded').textContent = excluded.length ? `Proposed simulation exclusions (${excluded.length}): ${excluded.join(', ')}. Official dates remain included; original rows are retained.` : 'No proposed simulation exclusions. Official results include all valid dates.';
     z('ziwo-zero-note').textContent = `${analysis.zeroDays} zero-volume dates in this range automatically omitted from calculations and trends, including future placeholders. Active days with 0% SLA are included. All original dates remain in this table.`;
     const start = state.page * PAGE;
     z('ziwo-records').innerHTML = state.rows.slice(start, start + PAGE).map(row => {
@@ -836,8 +875,8 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
       const abandonAbove = result.abandonment !== null && result.abandonment > window.DashboardTargets.abandonment;
       const warning = active && row.answered === 0 ? ' · WARNING: offered calls but zero answered; investigate' : '';
       const reviewFlag = ZiwoReview.REVIEW_DATES.includes(row.date) ? ' · requested SLA investigation' : '';
-      const label = (excludedDay ? 'Excluded manually' : !active ? 'Zero volume · omitted' : !inRange ? 'Outside range' : 'Included') + warning + reviewFlag;
-      return `<tr class="${excludedDay ? 'excluded-row' : ''} ${comparison.mismatch ? 'sla-mismatch' : ''}"><td><input type="checkbox" data-date="${row.date}" aria-label="Include ${row.date}" ${excludedDay ? '' : 'checked'}></td><th scope="row">${row.date}</th><td>${fmt(row.inbound, 0)}</td><td>${fmt(row.answered, 0)}</td><td>${fmt(row.abandoned, 0)}</td><td class="reported-sla">${rate(row.reportedSla)}%</td><td class="calculated-sla ${slaBelow ? 'target-breach' : ''}">${rate(result.sla)}${result.sla === null ? '' : '%'}</td><td class="sla-difference">${delta(comparison.difference)}${comparison.mismatch ? ' · differs' : ''}</td><td class="${abandonAbove ? 'target-breach' : ''}">${rate(result.abandonment)}${result.abandonment === null ? '' : '%'}</td><td>${fmt(row.talk)}</td><td>${label}</td></tr>`;
+      const label = (excludedDay ? 'Official: included · simulation: excluded' : !active ? 'Zero volume · omitted' : !inRange ? 'Outside range' : 'Included') + warning + reviewFlag;
+      return `<tr class="${excludedDay ? 'excluded-row' : ''} ${comparison.mismatch ? 'sla-mismatch' : ''}"><td><input type="checkbox" data-date="${row.date}" aria-label="Include ${row.date} in simulation" ${excludedDay ? '' : 'checked'}></td><th scope="row">${row.date}</th><td>${fmt(row.inbound, 0)}</td><td>${fmt(row.answered, 0)}</td><td>${fmt(row.abandoned, 0)}</td><td class="reported-sla">${rate(row.reportedSla)}%</td><td class="calculated-sla ${slaBelow ? 'target-breach' : ''}">${rate(result.sla)}${result.sla === null ? '' : '%'}</td><td class="sla-difference">${delta(comparison.difference)}${comparison.mismatch ? ' · differs' : ''}</td><td class="${abandonAbove ? 'target-breach' : ''}">${rate(result.abandonment)}${result.abandonment === null ? '' : '%'}</td><td>${fmt(row.talk)}</td><td>${label}</td></tr>`;
     }).join('');
     z('ziwo-page').textContent = `${start + 1}–${Math.min(start + PAGE, state.rows.length)} of ${state.rows.length} original rows`;
     z('ziwo-prev').disabled = state.page === 0; z('ziwo-next').disabled = start + PAGE >= state.rows.length;
@@ -872,13 +911,13 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     z('ziwo-quality').hidden = false;
     const quality = analysis ? ZiwoReview.dataQuality(state.rows, { from: analysis.start, through: z('ziwo-through').value, formula: z('ziwo-formula').value, dropThreshold: state.dropThreshold, today: today() }) : null;
     const issues = state.validation?.issues || [];
-    z('quality-scope').textContent = analysis ? `Checks original rows for ${analysis.start} to ${z('ziwo-through').value}, before manual exclusions. ${state.validation ? 'Validation issues below refer to the latest rejected upload, not the current valid analysis.' : 'All imported rows passed value and structure validation.'}` : state.rows.length ? 'A valid report is retained; select a valid analysis range. Rejected-upload issues are listed separately below.' : 'No valid report is available for date or SLA checks. Review the rejected upload below.';
+    z('quality-scope').textContent = analysis ? `Checks original rows for ${analysis.start} to ${z('ziwo-through').value}, before proposed simulation exclusions. ${state.validation ? 'Validation issues below refer to the latest rejected upload, not the current valid analysis.' : 'All imported rows passed value and structure validation.'}` : state.rows.length ? 'A valid report is retained; select a valid analysis range. Rejected-upload issues are listed separately below.' : 'No valid report is available for date or SLA checks. Review the rejected upload below.';
     z('quality-cards').innerHTML = [
       ['Missing calendar dates', quality ? fmt(quality.missingCount, 0) : '—', 'Absent dates are not assumed to have zero calls.'],
       ['Zero-call days', quality ? fmt(quality.zero.length, 0) : '—', quality ? `${quality.futureZero.length} future placeholder(s) in range · ${state.rows.filter(row => !Ziwo.hasVolume(row)).length} zero-call dates in original report` : 'Requires a valid report.'],
       ['Invalid rows / structure', fmt(issues.length, 0), state.validation ? 'Latest upload rejected · valid analysis preserved' : 'Validated on import · no invalid rows accepted'],
       ['Unusual SLA drops', quality ? fmt(quality.drops.length, 0) : '—', `At least ${rate(state.dropThreshold)} pp versus previous active observation`],
-      ['Calls offered, none answered', quality ? fmt(quality.noAnswers.length, 0) : '—', 'Warning only · retained in calculations unless manually excluded'],
+      ['Calls offered, none answered', quality ? fmt(quality.noAnswers.length, 0) : '—', 'Warning only · retained in calculations and cannot be removed from official results by simulation controls'],
       ['Investigation flags', quality ? fmt(quality.investigation.length, 0) : '—', 'Automatic drops and specifically requested review dates']
     ].map(([title, value, note]) => `<article class="quality-card"><h3>${title}</h3><strong>${value}</strong><p>${note}</p></article>`).join('');
     const missing = quality?.missing || [];
@@ -890,7 +929,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     list('quality-drops', (quality?.drops || []).slice(0, 100).map(row => `${row.date} vs ${row.previousDate}: calculated ${movement(row.calculatedDrop)}; reported ${movement(row.reportedDrop)}${row.gapDays > 1 ? ` · observations ${row.gapDays} calendar days apart` : ''}`), 'No unusual SLA drops at this threshold.');
     if ((quality?.drops.length || 0) > 100) listAppend('quality-drops', 'Showing the first 100 drops; narrow the date range for more detail.');
     list('quality-no-answers', (quality?.noAnswers || []).map(row => `${row.date}: ${row.inbound} offered, 0 answered. Retained in all calculations unless you manually exclude it; talk time is unavailable.`), 'No dates with offered calls and zero answered calls in this range.');
-    list('quality-investigation', (quality?.investigation || []).map(item => `${item.date}: ${item.requested ? 'Requested investigation date' : 'Automatic unusual-drop flag'} · ${!item.row ? 'no record in this report; cannot confirm a drop' : !Ziwo.hasVolume(item.row) ? 'zero-call record; cannot evaluate active-day SLA' : item.drop ? 'unusual SLA drop detected; investigate counts and Ziwo configuration' : 'review flagged; no automatic threshold-sized drop confirmed in this selection'}. No automatic exclusion.`), 'No requested or automatic investigation flags in this range.');
+    list('quality-investigation', (quality?.investigation || []).map(item => `${item.date}: ${item.requested ? 'Requested investigation date' : 'Automatic unusual-drop flag'} · ${!item.row ? 'no record in this report; cannot confirm a drop' : !Ziwo.hasVolume(item.row) ? 'zero-call record; cannot evaluate active-day SLA' : item.drop ? 'unusual SLA drop detected; investigate counts and Ziwo configuration' : 'review flagged; no automatic threshold-sized drop confirmed in this selection'}. No official exclusion.`), 'No requested or automatic investigation flags in this range.');
     z('quality-invalid').hidden = !state.validation;
     z('quality-invalid-source').textContent = state.validation ? `Rejected file: ${state.validation.source}${state.rows.length ? ` · current valid analysis: ${state.source}` : ''}` : '';
     list('quality-issues', issues.slice(0, 100).map(issue => `${issue.row ? `Row ${issue.row}` : 'Report'}${issue.day ? ` (${issue.day})` : ''}: ${issue.message}`), 'No validation issues.');
@@ -935,13 +974,15 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     try {
       const options = { ...settings(), from: state.analysis.start, source: state.source, targets: window.DashboardTargets, discrepancyThreshold: state.discrepancyThreshold };
       const tables = ZiwoReview.exportTables(state.performance, options);
+      tables[1].rows.push(['Official Inclusion Policy', 'All valid active dates included. Simulation choices and manually recorded approval statuses do not change official KPIs.']);
+      tables.push(ZiwoApprovals.exportSheets(state.approvals, state.excluded, 'OFFICIAL PERFORMANCE'));
       tables[1].rows.push(['Daily Table Filter', z('performance-filter').selectedOptions[0].textContent]);
       tables[0].rowStyles = [1, ...state.performance.map(row => row.slaBelow || row.abandonmentAbove || row.noAnswers || row.requestedInvestigation || row.unusualDrop ? 3 : 0)];
       const bytes = ZiwoExcel.workbook(tables), blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = URL.createObjectURL(blob), link = document.createElement('a');
       link.href = url; link.download = `ziwo-daily-${options.from}-to-${options.through}.xlsx`; link.hidden = true; document.body.append(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      z('performance-export-status').textContent = `Downloaded ${state.performance.length} filtered daily rows as an Excel workbook. Full AHT is blank; no data was sent to a server.`;
+      z('performance-export-status').textContent = `Downloaded ${state.performance.length} official filtered daily rows with approval records. No simulation exclusions were applied. Full AHT is blank; no data was sent to a server.`;
     } catch (e) { z('performance-export-status').textContent = `Export failed: ${e.message}`; }
   });
   function renderManagement(analysis) {
@@ -956,7 +997,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
       ['Days below SLA target', `${result.below} / ${result.activeDays}`],
       ['Days above abandonment target', `${result.above} / ${result.activeDays}`]
     ].map(([label, value]) => `<div class="management-stat"><h3>${label}</h3><strong>${value}</strong></div>`).join('');
-    z('management-note').textContent = `Uses the included active dates and selected count-based formula. SLA minimum ${rate(options.targets.sla)}%, abandonment maximum ${rate(options.targets.abandonment)}%. Ziwo-reported SLA remains separate; it is not averaged. Full AHT is unavailable and is never estimated from talk time.`;
+    z('management-note').textContent = `OFFICIAL PERFORMANCE: all valid active dates in range; approval statuses and simulation exclusions have no effect. SLA minimum ${rate(options.targets.sla)}%, abandonment maximum ${rate(options.targets.abandonment)}%. Ziwo-reported SLA remains separate; it is not averaged. Full AHT is unavailable and is never estimated from talk time.`;
     z('management-warnings').textContent = `Data quality review (original dates before exclusions): ${q.missingCount} missing calendar date(s), ${q.zero.length} zero-call day(s), ${q.noAnswers.length} day(s) with offered calls but zero answered, ${q.drops.length} unusual SLA drop(s), ${q.investigation.length} investigation flag(s). ${state.validation ? `${state.validation.issues.length} validation issue(s) in the most recent rejected upload; current valid analysis retained.` : 'Imported values passed validation.'}`;
     const comparison = ZiwoReview.comparePeriods(state.rows, { ...options, from: analysis.start });
     z('comparison-periods').textContent = `Selected: ${comparison.current.from} → ${comparison.current.through} (${comparison.current.calendarDays} calendar days). Previous: ${comparison.previous.from} → ${comparison.previous.through} (${comparison.previous.calendarDays} calendar days). ${comparison.method}`;
@@ -965,6 +1006,65 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     z('comparison-coverage').textContent = `${comparison.partial ? 'PARTIAL COVERAGE / EXCLUSIONS: comparisons use observed included data, not complete-period estimates. ' : 'Both periods have complete calendar-date coverage. '}Selected: ${comparison.current.records}/${comparison.current.calendarDays} dates supplied, ${comparison.current.excluded} manually excluded. Previous: ${comparison.previous.records}/${comparison.previous.calendarDays} supplied, ${comparison.previous.excluded} excluded. Missing records are not assumed zero. A missing baseline or zero prior call volume gives an unavailable change. Upload a longer report if previous-period data is missing.`;
     z('comparison-coverage').classList.toggle('coverage-warning', comparison.partial);
   }
+  function syncApprovalDates() {
+    if (!state.rows.length) return;
+    const dates = ZiwoApprovals.flaggedDates(state.rows, state.dropThreshold, z('ziwo-formula').value);
+    for (const date of dates) if (!state.approvals.has(date)) state.approvals.set(date, ZiwoApprovals.record('Pending Approval', ZiwoReview.REVIEW_DATES.includes(date) ? 'Client approval is pending. Keep included in official KPIs.' : ''));
+    state.approvalDates = [...state.approvals.keys()].sort();
+  }
+  function renderApprovalRecords() {
+    const existing = new Set(state.rows.map(row => row.date));
+    const retained = new Map([...z('approval-records').children].map(row => [row.dataset.approvalDate, row]));
+    z('approval-records').replaceChildren(...state.approvalDates.map(date => {
+      if (retained.has(date)) { const row = retained.get(date); const proposal = row.querySelector('[data-proposal-date]'); proposal.checked = state.excluded.has(date); return row; }
+      const record = state.approvals.get(date), row = document.createElement('tr'); row.dataset.approvalDate = date;
+      const cell = text => { const item = document.createElement('td'); if (text) item.textContent = text; row.append(item); return item; };
+      cell(date); cell(existing.has(date) ? 'Present · officially included in range' : 'Not in imported report');
+      const select = document.createElement('select'); select.setAttribute('aria-label', `Approval status ${date}`); select.dataset.approvalStatus = date;
+      for (const status of ZiwoApprovals.STATUSES) select.add(new Option(status, status)); select.value = record.status; cell().append(select);
+      const reason = document.createElement('textarea'); reason.value = record.reason; reason.maxLength = 2000; reason.rows = 2; reason.setAttribute('aria-label', `Approval reason ${date}`); reason.dataset.approvalReason = date; cell().append(reason);
+      const proposed = document.createElement('input'); proposed.type = 'checkbox'; proposed.checked = state.excluded.has(date); proposed.disabled = !existing.has(date); proposed.dataset.proposalDate = date; proposed.setAttribute('aria-label', `Propose simulation exclusion ${date}`); cell().append(proposed);
+      const save = document.createElement('button'); save.type = 'button'; save.textContent = 'Save record'; save.dataset.saveApproval = date; save.setAttribute('aria-label', `Save approval record ${date}`); cell().append(save);
+      return row;
+    }));
+  }
+  z('approval-records').addEventListener('click', event => {
+    const date = event.target.dataset.saveApproval; if (!date) return;
+    const row = event.target.closest('tr');
+    try {
+      state.approvals.set(date, ZiwoApprovals.record(row.querySelector('select').value, row.querySelector('textarea').value));
+      z('approval-feedback').textContent = `${date}: saved manually as ${state.approvals.get(date).status}. This is not proof of client approval; official results are unchanged.`;
+    } catch (e) { z('approval-feedback').textContent = e.message; }
+  });
+  z('approval-records').addEventListener('change', event => {
+    const date = event.target.dataset.proposalDate; if (!date) return;
+    if (event.target.checked) state.excluded.add(date); else state.excluded.delete(date);
+    renderTable(state.analysis); renderAdjusted();
+  });
+  function renderAdjusted() {
+    if (!state.analysis) return;
+    const result = ZiwoApprovals.performance(state.rows, settings(), state.excluded), s = result.adjusted.summary;
+    const effective = result.official.rows.filter(row => state.excluded.has(row.date)).map(row => row.date);
+    z('simulation-scope').textContent = `SIMULATION ONLY. Proposed excluded active dates in this range: ${effective.join(', ') || 'none'}. Selection is independent of the recorded approval status and is not authorization. Official dates are not removed. ${state.excluded.size} total proposed date(s) retained across views.`;
+    z('adjusted-kpis').innerHTML = [card('Simulated offered calls',fmt(s.offered,0),'','Not official'),card('Simulated answered calls',fmt(s.answered,0),'','Not official'),card('Simulated abandoned calls',fmt(s.abandoned,0),'','Not official'),card('Simulated overall SLA',rate(s.sla),'%','From adjusted summed counts · not official'),card('Simulated abandonment',rate(s.abandonment),'%','Not official'),card('Simulated answer rate',rate(s.answerRate),'%','Not official'),card('Simulated weighted talk time',fmt(s.talk,2),'sec','Not full AHT · not official'),card('Full AHT','—','sec','Unavailable · never estimated')].join('');
+    z('approval-impact').innerHTML = [['SLA','sla'],['Abandonment rate','abandonment']].map(([label,key]) => `<tr><th scope="row">${label}</th><td>${rate(result.official.summary[key])}%</td><td>${rate(s[key])}%</td><td>${delta(result.impact[key])}</td></tr>`).join('');
+    z('export-adjusted').disabled = !result.adjusted.rows.length;
+    z('simulation-export-status').textContent = '';
+  }
+  z('export-adjusted').addEventListener('click', () => {
+    if (!state.analysis) return;
+    try {
+      const analysis = ZiwoApprovals.performance(state.rows, settings(), state.excluded).adjusted;
+      const options = {...settings(),from:analysis.start,excluded:[...state.excluded],source:state.source,targets:window.DashboardTargets,discrepancyThreshold:state.discrepancyThreshold};
+      const performance = ZiwoReview.dailyPerformance(analysis.rows, options);
+      const sheets = ZiwoReview.exportTables(performance, options); sheets[0].name = 'SIMULATION ONLY Adjusted';
+      sheets[1].rows.push(['IMPORTANT', 'ADJUSTED SIMULATION ONLY. Not official performance. Approval statuses are manually entered and not proof of client approval.']);
+      sheets.push(ZiwoApprovals.exportSheets(state.approvals, state.excluded, 'ADJUSTED SIMULATION ONLY'));
+      const bytes = ZiwoExcel.workbook(sheets), url = URL.createObjectURL(new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+      const link = document.createElement('a'); link.href=url; link.download=`SIMULATION-ONLY-ziwo-${analysis.start}-to-${options.through}.xlsx`; document.body.append(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+      z('simulation-export-status').textContent = `Downloaded ${performance.length} simulated daily rows. This workbook does not replace official results.`;
+    } catch(e) { z('simulation-export-status').textContent=`Simulation export failed: ${e.message}`; }
+  });
   const NS = 'http://www.w3.org/2000/svg';
   function svgElement(tag, attributes = {}, text) { const node = document.createElementNS(NS, tag); for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value)); if (text !== undefined) node.textContent = text; return node; }
   let chartGroups = [], chartOptions;

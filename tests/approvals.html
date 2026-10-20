@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Exclusion Approval Checks</title><link rel="icon" href="data:,"></head><body><h1>Official vs simulated exclusion checks</h1><pre id="results">Running…</pre><iframe title="Dashboard under test" src="../index.html" style="width:375px;height:900px"></iframe><script>
+document.querySelector('iframe').addEventListener('load',async function(){
+ const d=this.contentDocument,w=this.contentWindow,results=[],output=document.getElementById('results');let blob;
+ const check=(c,m)=>{if(!c)throw Error(m);results.push('PASS: '+m);output.textContent=results.join('\n');};
+ const wait=async f=>{for(let i=0;i<200;i++){if(f())return;await new Promise(r=>setTimeout(r,25));}throw Error('Upload timeout');};
+ const change=(id,v)=>{d.getElementById(id).value=v;d.getElementById(id).dispatchEvent(new Event('change',{bubbles:true}));};
+ const metrics=id=>[...d.querySelectorAll('#'+id+' .metric')].map(e=>e.textContent);
+ const status=date=>d.querySelector(`[data-approval-status="${date}"]`),reason=date=>d.querySelector(`[data-approval-reason="${date}"]`),save=date=>d.querySelector(`[data-save-approval="${date}"]`).click();
+ try{
+  const csv=await fetch('../samples/ziwo-management-sample.csv').then(r=>r.text());
+  const dt=new w.DataTransfer();dt.items.add(new w.File([csv],'approval-sample.csv'));d.getElementById('ziwo-file').files=dt.files;d.getElementById('ziwo-file').dispatchEvent(new Event('change',{bubbles:true}));await wait(()=>d.getElementById('ziwo-status').textContent.includes('22 original'));change('ziwo-view','mtd');
+  check(status('2026-10-04').value==='Pending Approval'&&status('2026-10-11').value==='Pending Approval','October 4 and 11 start Pending Approval');
+  const baseline=JSON.stringify(metrics('ziwo-summary')),chart=d.getElementById('ziwo-trend').outerHTML,management=d.getElementById('management-values').textContent;
+  check(metrics('ziwo-summary')[0]==='1,100'&&metrics('ziwo-summary')[3]==='77.09%','Official baseline contains both pending dates');
+  check(metrics('adjusted-kpis')[0]==='1,100'&&metrics('adjusted-kpis')[3]==='77.09%','Adjusted simulation starts equal to official when no exclusions are proposed');
+  for(const date of ['2026-10-04','2026-10-11'])d.querySelector(`[data-proposal-date="${date}"]`).click();
+  check(JSON.stringify(metrics('ziwo-summary'))===baseline,'Proposed exclusions cannot change official KPIs');
+  check(d.getElementById('ziwo-trend').outerHTML===chart,'Official trend chart remains unchanged');
+  check(d.getElementById('management-values').textContent===management,'Official management summary remains unchanged');
+  check(d.querySelectorAll('#performance-records tr').length===11,'Official daily table retains all 11 active dates');
+  check(metrics('adjusted-kpis')[0]==='900'&&metrics('adjusted-kpis')[3]==='92.00%'&&metrics('adjusted-kpis')[4]==='4.00%','Simulated adjusted counts, SLA and abandonment are correct');
+  check(d.getElementById('approval-impact').textContent.includes('+14.91 pp')&&d.getElementById('approval-impact').textContent.includes('−4.45 pp'),'Management impact uses signed percentage points');
+  check(d.getElementById('simulation-scope').textContent.includes('SIMULATION ONLY'),'Simulation label explicit');
+  status('2026-10-04').value='Approved';reason('2026-10-04').value='Manually entered review note; not client evidence.';save('2026-10-04');
+  check(JSON.stringify(metrics('ziwo-summary'))===baseline&&d.getElementById('approval-feedback').textContent.includes('not proof'),'Approved record is not proof and does not change official metrics');
+  status('2026-10-11').value='Rejected';reason('2026-10-11').value='Client rejected proposal.';save('2026-10-11');
+  check(JSON.stringify(metrics('ziwo-summary'))===baseline&&metrics('adjusted-kpis')[0]==='900','Rejected record does not automatically modify either view');
+  reason('2026-10-04').value='Unsaved draft';change('ziwo-formula','queue');
+  check(reason('2026-10-04').value==='Unsaved draft','Draft reason survives chart and settings re-renders');
+  const original=w.URL.createObjectURL.bind(w.URL);w.URL.createObjectURL=b=>{blob=b;return original(b);};const click=w.HTMLAnchorElement.prototype.click;w.HTMLAnchorElement.prototype.click=function(){if(this.download.endsWith('.xlsx'))return;click.call(this);};
+  d.getElementById('export-performance').click();let book=await w.ZiwoXlsx.readWorkbook(await blob.arrayBuffer()),rows=await book.readSheet(0),records=await book.readSheet(2);
+  check(rows.length===12&&rows.some(r=>r[0]==='2026-10-04')&&rows.some(r=>r[0]==='2026-10-11'),'Official Excel keeps both pending/proposed dates');
+  check(records.some(r=>r[0]==='2026-10-04'&&r[1]==='Approved'&&r[2]==='Manually entered review note; not client evidence.'),'Only explicitly saved manual record is exported');
+  check(records.some(r=>r[0]==='2026-10-11'&&r[1]==='Rejected'),'Rejected status and reason retained in approval export');
+  d.getElementById('export-adjusted').click();book=await w.ZiwoXlsx.readWorkbook(await blob.arrayBuffer());rows=await book.readSheet(0);
+  check(book.sheets[0].startsWith('SIMULATION ONLY')&&rows.length===10,'Adjusted export separately labeled and contains nine simulated days');
+  check(!rows.some(r=>['2026-10-04','2026-10-11'].includes(r[0])),'Adjusted export applies proposed exclusions only to simulation');
+  check(rows.every((r,i)=>!i||r[10]===''),'Full AHT never estimated in adjusted export');
+  d.getElementById('ziwo-restore').click();
+  check(metrics('adjusted-kpis')[0]==='1,100'&&d.getElementById('approval-impact').textContent.includes('0.00 pp'),'Restoring simulation dates zeroes the impact');
+  check(status('2026-10-04').value==='Approved'&&status('2026-10-11').value==='Rejected','Restoring simulation never overwrites manual approval records');
+  check(d.documentElement.scrollWidth<=375,'Approval and simulation UI responsive on mobile');
+  output.textContent=results.join('\n')+`\nALL ${results.length} APPROVAL CHECKS PASSED`;
+ }catch(e){output.textContent=results.join('\n')+'\nFAIL: '+e.message;}
+});
+</script></body></html>
