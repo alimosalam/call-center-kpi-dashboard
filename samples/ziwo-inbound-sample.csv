@@ -1,0 +1,6 @@
+Day,Inbound Calls,SLA,Abandoned Calls,Average Talk Time for Queue Calls,Answered Queue Calls,Calls landed in IVR,Calls landed in Queue,Average Waiting Time in Queue,Answered Calls Before SLA Threshold,Abandoned Calls Before SLA Threshold
+2026-09-28,50,70%,3,00:02:30,40,50,50,00:00:15,35,1
+2026-10-01,100,90%,5,00:01:40,90,100,100,00:00:20,90,2
+2026-10-02,900,0%,45,00:05:00,810,900,900,00:00:30,0,20
+2026-10-05,200,90%,6,00:03:20,190,200,200,00:00:10,180,3
+2026-10-31,0,0%,0,00:00:00,0,0,0,00:00:00,0,0
