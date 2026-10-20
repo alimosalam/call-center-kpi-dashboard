@@ -153,6 +153,30 @@
   const quality=$('ziwo-quality');const qualityGroup=group('Data quality & validation',[quality]);qualityGroup.hidden=quality.hidden;
   new MutationObserver(()=>{qualityGroup.hidden=quality.hidden;if(!$('quality-invalid').hidden)qualityGroup.open=true;}).observe(quality,{attributes:true,attributeFilter:['hidden'],subtree:true});
   group('SLA reconciliation & investigation',[$('ziwo-comparison'),$('reconciliation-title').closest('.panel')]);
+  // Quick access to existing report sections; keeps their original controls and calculations intact.
+  const reportNavigation=document.createElement('nav');
+  reportNavigation.setAttribute('aria-label','Calls report quick navigation');
+  reportNavigation.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 20px';
+  const reportSections=[
+    ['Summary','management-title'],
+    ['Daily performance','performance-title'],
+    ['Trends','ziwo-trend'],
+    ['Approvals & simulation','approval-title'],
+    ['SLA investigation','reconciliation-title'],
+    ['Original records','ziwo-daily-heading']
+  ];
+  for(const [label,id] of reportSections){
+    const button=document.createElement('button');
+    button.type='button';button.className='secondary';button.textContent=label;
+    button.addEventListener('click',()=>{
+      const target=$(id);if(!target)return;
+      let parent=target.parentElement;
+      while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}
+      target.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    reportNavigation.append(button);
+  }
+  $('report-workspace').prepend(reportNavigation);
   window.CommandCenter={context,navigate,openCalls,reveal};
   navigate(location.hash.slice(1)||'overview',false,false);
 })();
