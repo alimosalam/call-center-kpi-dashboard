@@ -32,8 +32,8 @@ document.querySelector('iframe').addEventListener('load',async function(){
   check(rateCells.length===33&&rateCells.every(text=>/\d+\.\d{2}%/.test(text)),'All daily rates use exactly two decimal places');
   check(d.querySelectorAll('#kpis .metric')[0].textContent==='92.00%','Manual SLA formatting preserved with two decimals');
   const baseline=stats().join('|');await upload('management.xlsx',xlsx);check(stats().join('|')===baseline,'CSV and XLSX management results match');
-  const zero=d.querySelector('[data-date="2026-10-04"]');zero.click();check(d.querySelector('#ziwo-summary .metric').textContent==='1,000','Manual exclusion is available but never automatic');
-  check(d.getElementById('comparison-coverage').textContent.startsWith('PARTIAL COVERAGE'),'Manual exclusion reflected in comparison coverage');
+  const zero=d.querySelector('[data-date="2026-10-04"]');zero.click();check(d.querySelector('#ziwo-summary .metric').textContent==='1,100' && d.querySelector('#adjusted-kpis .metric').textContent==='1,000','Manual proposal changes simulation, never official totals');
+  check(d.getElementById('comparison-coverage').textContent.startsWith('Both periods have complete'),'Official comparison ignores simulation exclusions');
   d.getElementById('ziwo-restore').click();change('ziwo-view','daily');change('ziwo-from','2026-10-01');
   check(d.getElementById('comparison-periods').textContent.includes('2026-09-20 → 2026-09-30'),'Daily previous equivalent period has equal length');
   check(d.querySelectorAll('#period-comparison tr')[3].children[3].textContent==='—','Missing baseline does not create invented volume change');

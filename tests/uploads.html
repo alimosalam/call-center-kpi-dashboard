@@ -55,8 +55,8 @@ frame.addEventListener('load', async () => {
     d.querySelector('[data-trend="volume"]').click();check(d.querySelectorAll('#ziwo-chart-legend .dot').length === 3, 'Call volume trend has three series');
     d.querySelector('[data-trend="abandonment"]').click();check(d.querySelectorAll('#ziwo-trend .trend-point').length === 2, 'Abandonment chart renders');
     const include = d.querySelector('[data-date="2026-10-02"]'); include.click();
-    check(metrics()[3] === '90.00%', 'Exclusion recalculates SLA');
-    check(metrics()[6] === '100.0sec', 'Exclusion recalculates weighted talk time');
+    check(metrics()[3] === '9.00%' && d.querySelectorAll('#adjusted-kpis .metric')[3].textContent === '90.00%', 'Proposal recalculates only simulated SLA');
+    check(metrics()[6] === '280.0sec' && d.querySelectorAll('#adjusted-kpis .metric')[6].textContent === '100.00sec', 'Proposal recalculates only simulated weighted talk time');
     check(d.getElementById('ziwo-excluded').textContent.includes('2026-10-02'), 'Excluded date displayed');
     check(d.querySelectorAll('#ziwo-records tr').length === 5, 'Original rows preserved');
     d.getElementById('ziwo-restore').click();check(metrics()[3] === '9.00%', 'Restore recalculates original results');

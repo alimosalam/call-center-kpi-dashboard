@@ -23,14 +23,14 @@ document.querySelector('iframe').addEventListener('load',async function(){
   change('performance-filter','attention');check(d.querySelectorAll('#performance-records tr').length===1&&d.getElementById('performance-records').textContent.includes('2026-10-02'),'Target-breach filter');
   d.getElementById('export-performance').click();check(exported&&exported.type.includes('spreadsheetml'),'Excel button creates XLSX Blob locally');
   let book=await w.ZiwoXlsx.readWorkbook(await exported.arrayBuffer()),sheet=await book.readSheet(0),settings=await book.readSheet(1);
-  check(book.sheets.join(',')==='Daily Performance,Analysis Settings','Workbook has daily table and settings sheets');
+  check(book.sheets.join(',')==='Daily Performance,Analysis Settings,Exclusion Approval Records','Official workbook has daily table, settings, and approval records');
   check(sheet.length===2&&sheet[1][0]==='2026-10-02','Excel export respects performance filter');
   check(sheet[1][4]===0&&sheet[1][7]===5&&sheet[1][9]===300,'Excel retains true zero SLA and numeric percentage/talk values');
   check(sheet[1][10]===''&&settings.some(row=>row[0]==='Full AHT'&&row[1].includes('Never estimated')),'Full AHT stays blank and explained in export');
   change('performance-filter','all');d.querySelector('[data-date="2026-10-02"]').click();d.getElementById('export-performance').click();
   book=await w.ZiwoXlsx.readWorkbook(await exported.arrayBuffer());sheet=await book.readSheet(0);settings=await book.readSheet(1);
-  check(sheet.length===3&&!sheet.slice(1).some(row=>row[0]==='2026-10-02'),'Excel respects manual date exclusions');
-  check(settings.some(row=>row[0]==='Excluded Date'&&row[1]==='2026-10-02'),'Export records excluded date');
+  check(sheet.length===4&&sheet.slice(1).some(row=>row[0]==='2026-10-02'),'Official Excel retains proposed exclusion dates');
+  check(settings.some(row=>row[0]==='Excluded Dates'&&row[1]==='None'),'Official export records no date exclusions');
   d.getElementById('ziwo-restore').click();const mismatch=w.Ziwo.parseCSV(csv);mismatch[3][2]='70%';await upload(mismatch.map(row=>row.join(',')).join('\n'));
   change('ziwo-from','2026-10-01');change('ziwo-through','2026-10-05');
   check(d.getElementById('reconciliation-summary').textContent.startsWith('1 significant'),'Significant SLA gap summary');
