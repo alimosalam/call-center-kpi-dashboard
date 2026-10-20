@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Command Center navigation tests</title><link rel="icon" href="data:,"></head><body><h1>Command Center navigation & state regression checks</h1><pre id="results">Running…</pre><iframe src="../index.html#overview" title="Command Center under test" style="width:375px;height:900px"></iframe><script>
+document.querySelector('iframe').addEventListener('load',async function(){
+ const d=this.contentDocument,w=this.contentWindow,out=document.getElementById('results'),passed=[];
+ const check=(c,m)=>{if(!c)throw Error(m);passed.push('PASS: '+m);out.textContent=passed.join('\n');};
+ const change=(id,value)=>{d.getElementById(id).value=value;d.getElementById(id).dispatchEvent(new Event('change',{bubbles:true}));};
+ const navigate=key=>d.querySelector(`[data-cc-module="${key}"]`).click();
+ const wait=async f=>{for(let i=0;i<200;i++){if(f())return;await new Promise(r=>setTimeout(r,25));}throw Error('Timed out waiting for report');};
+ const metrics=()=>d.getElementById('ziwo-summary').textContent;
+ try{
+  check(!d.getElementById('module-overview').hidden&&d.getElementById('module-calls').hidden,'Overview is the default application page');
+  check(d.querySelectorAll('[data-cc-module]').length===8,'All eight modules have navigation entries');
+  check(d.querySelectorAll('#cc-account').length===1&&d.querySelectorAll('#cc-site').length===1,'One Account/Site selector pair; no duplicated command center');
+  check([...d.querySelectorAll('#cc-overview-kpis .overview-value')].every(el=>el.textContent.startsWith('—')),'No invented live KPI values on initial Overview');
+  check(d.querySelectorAll('#cc-overview-kpis article').length===7,'Unified Overview has all seven requested KPI cards');
+  for(const key of ['emails','quality','csat','agents','reports']){
+   navigate(key);check(!d.getElementById('module-'+key).hidden&&d.getElementById('module-'+key).textContent.includes('Not yet operational'),'Planned module '+key+' is clearly non-operational');
+  }
+  navigate('calls');d.getElementById('report-tab').click();change('cc-account','MAF Entertainment');change('cc-site','UAE');
+  const csv=await fetch('../samples/ziwo-management-sample.csv').then(r=>r.text());const transfer=new w.DataTransfer();transfer.items.add(new w.File([csv],'synthetic-management.csv'));d.getElementById('ziwo-file').files=transfer.files;d.getElementById('ziwo-file').dispatchEvent(new Event('change',{bubbles:true}));await wait(()=>d.getElementById('ziwo-status').textContent.includes('22 original'));change('ziwo-view','mtd');
+  const baseline=metrics();check(baseline.includes('77.09'),'Existing official count-based SLA preserved');
+  d.querySelector('[data-proposal-date="2026-10-04"]').click();
+  const status=d.querySelector('[data-approval-status="2026-10-04"]'),reason=d.querySelector('[data-approval-reason="2026-10-04"]');status.value='Approved';reason.value='Manual note, not proof';d.querySelector('[data-save-approval="2026-10-04"]').click();
+  const adjusted=d.getElementById('adjusted-kpis').textContent,chart=d.getElementById('ziwo-trend').outerHTML;
+  for(const key of ['overview','emails','settings','agents','calls'])navigate(key);
+  check(metrics()===baseline,'Official report survives module navigation without recalculation changes');
+  check(d.getElementById('adjusted-kpis').textContent===adjusted,'Simulation survives module navigation');
+  check(d.querySelector('[data-approval-status="2026-10-04"]').value==='Approved'&&d.querySelector('[data-approval-reason="2026-10-04"]').value==='Manual note, not proof','Manual approval record survives navigation');
+  check(d.getElementById('ziwo-trend').outerHTML===chart,'Chart is retained in the existing DOM');
+  navigate('overview');check(d.querySelector('#cc-overview-kpis .overview-value').textContent==='77.09%','Overview consumes official results, never adjusted simulation');
+  check(d.querySelectorAll('#cc-overview-kpis .overview-value')[2].textContent==='—sec','Overview never estimates full AHT from talk time');
+  check([...d.querySelectorAll('#cc-overview-kpis article')].slice(3).every(el=>el.querySelector('.overview-value').textContent==='—'),'Unimplemented channels stay unavailable after real Calls import');
+  change('cc-site','Egypt');check(d.querySelector('#cc-overview-kpis .overview-value').textContent==='—%','UAE report never silently appears as Egypt Overview data');
+  navigate('calls');check(!d.getElementById('cc-context-guard').hidden&&d.getElementById('calls-context-content').hidden,'Context mismatch guards the existing Calls workspace');
+  check(metrics()===baseline,'Context switch retains original report data');
+  d.getElementById('cc-return-context').click();check(d.getElementById('cc-site').value==='UAE'&&!d.getElementById('calls-context-content').hidden,'Returning restores the bound Account/Site and report');
+  change('cc-account','Relaam');check(!d.getElementById('cc-context-guard').hidden,'Account changes also guard report attribution');d.getElementById('cc-return-context').click();
+  check(d.getElementById('cc-account').value==='MAF Entertainment','Return retains original account selection');
+  change('cc-through','2026-10-04');check(d.getElementById('ziwo-through').value==='2026-10-04'&&metrics().includes('69.00'),'Top reporting range drives existing Calls analysis');
+  change('ziwo-through','2026-10-11');check(d.getElementById('cc-through').value==='2026-10-11','Existing Calls date changes synchronize the top bar');
+  const current=metrics();d.getElementById('cc-theme').click();check(d.documentElement.dataset.theme==='dark','Optional dark mode toggles');
+  check(metrics()===current,'Theme switch never loses report state');d.getElementById('cc-theme').click();
+  navigate('settings');check(!d.getElementById('module-settings').hidden,'Settings is an operational local preferences page');
+  d.getElementById('cc-settings-theme').click();check(d.documentElement.dataset.theme==='dark','Settings and top-bar theme controls stay synchronized');d.getElementById('cc-settings-theme').click();
+  check(d.documentElement.scrollWidth<=375,'Module layout fits the mobile viewport');
+  check(d.getElementById('ziwo-formula').value==='inbound'&&d.getElementById('target-sla').value==='90.00','Existing formula and target defaults remain unchanged');
+  navigate('calls');d.getElementById('report-tab').click();
+  const race=new w.DataTransfer();race.items.add(new w.File([csv],'context-race.csv'));d.getElementById('ziwo-file').files=race.files;d.getElementById('ziwo-file').dispatchEvent(new Event('change',{bubbles:true}));change('cc-site','Egypt');await wait(()=>d.getElementById('ziwo-status').textContent.includes('context-race.csv · 22 original'));
+  check(!d.getElementById('cc-context-guard').hidden,'Changing Site while upload is parsing never relabels the report');d.getElementById('cc-return-context').click();
+  check(d.getElementById('cc-site').value==='UAE','Import retains the context captured when the file was selected');
+  d.getElementById('manual-tab').click();d.getElementById('offered').value='1300';d.getElementById('offered').dispatchEvent(new Event('input',{bubbles:true}));
+  d.getElementById('report-tab').click();change('cc-site','Egypt');
+  const egypt=new w.DataTransfer();egypt.items.add(new w.File([csv],'egypt-explicit-replacement.csv'));d.getElementById('ziwo-file').files=egypt.files;d.getElementById('ziwo-file').dispatchEvent(new Event('change',{bubbles:true}));await wait(()=>d.getElementById('ziwo-status').textContent.includes('egypt-explicit-replacement.csv · 22 original'));
+  check(d.getElementById('cc-context-guard').hidden&&d.querySelector('#ziwo-summary .metric').textContent==='1,100','Explicit replacement binds the new context without adding UAE totals');
+  d.getElementById('manual-tab').click();check(!d.getElementById('cc-context-guard').hidden,'Manual totals retain their original context after another-site report import');d.getElementById('cc-return-context').click();
+  check(d.getElementById('cc-site').value==='UAE'&&d.getElementById('offered').value==='1300','Original manual totals remain recoverable without data loss');
+  const saved=JSON.parse(w.localStorage.getItem('cc-personal-context-v1'));check(saved.account==='MAF Entertainment'&&saved.site==='UAE','Existing Phase 1 context storage key remains compatible');
+  out.textContent=passed.join('\n')+`\nALL ${passed.length} NAVIGATION CHECKS PASSED`;
+ }catch(e){out.textContent=passed.join('\n')+'\nFAIL: '+e.message;}
+});
+</script></body></html>

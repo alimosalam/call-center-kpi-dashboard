@@ -6,11 +6,11 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const escapeClosingTag = (text, tag) => text.replace(new RegExp(`</${tag}`, 'gi'), `<\\/${tag}`);
 function embedAssets(html) {
-  const css = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+  const css = ['styles.css', 'command-center.css'].map(file => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
   const calculations = fs.readFileSync(path.join(root, 'calculations.js'), 'utf8');
   const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
   const styles = `<!-- BEGIN EMBEDDED STYLES -->\n<style>\n${escapeClosingTag(css, 'style')}\n</style>\n<!-- END EMBEDDED STYLES -->`;
-  const reportScripts = ['ziwo.js', 'ziwo-review.js', 'ziwo-approvals.js', 'xlsx-reader.js', 'xlsx-writer.js', 'ziwo-ui.js'].map(file => `<script>\n${escapeClosingTag(fs.readFileSync(path.join(root, file), 'utf8'), 'script')}\n</script>`).join('\n');
+  const reportScripts = ['ziwo.js', 'ziwo-review.js', 'ziwo-approvals.js', 'xlsx-reader.js', 'xlsx-writer.js', 'ziwo-ui.js', 'command-center.js'].map(file => `<script>\n${escapeClosingTag(fs.readFileSync(path.join(root, file), 'utf8'), 'script')}\n</script>`).join('\n');
   const scripts = `<!-- BEGIN EMBEDDED SCRIPTS -->\n<script>\n${escapeClosingTag(fs.readFileSync(path.join(root, 'dashboard-format.js'), 'utf8'), 'script')}\n</script>\n<script>\n${escapeClosingTag(calculations, 'script')}\n</script>\n<script>\n${escapeClosingTag(app, 'script')}\n</script>\n${reportScripts}\n<!-- END EMBEDDED SCRIPTS -->`;
   if (!html.includes('<!-- BEGIN EMBEDDED STYLES -->') || !html.includes('<!-- BEGIN EMBEDDED SCRIPTS -->')) {
     throw new Error('Missing embedded asset markers in index.html');

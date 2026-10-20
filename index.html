@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Call Center · Performance Dashboard</title>
+  <title>Contact Center Command Center</title>
   <link rel="icon" href="data:,">
   <!-- BEGIN EMBEDDED STYLES -->
 <style>
@@ -22,13 +22,44 @@
 .management-panel{margin-top:20px}.management-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.management-stat{padding:15px;background:#f5f9fa;border:1px solid var(--border);border-radius:8px}.management-stat strong{display:block;font-size:23px;margin-top:12px;overflow-wrap:anywhere}.management-stat h3{min-height:34px}.management-panel summary{font-size:13px;font-weight:650;cursor:pointer}.coverage-warning{background:#fff1da;color:#845017}.management-panel .point-detail{line-height:1.8}@media(max-width:900px){.management-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:370px){.management-grid{grid-template-columns:minmax(0,1fr)}}
 .approval-panel,.simulation-panel{margin-top:22px}.simulation-panel{border:2px dashed #b78b45;background:#fffcf6}.simulation-panel .eyebrow{color:#91621e}.simulation-panel h3.impact-heading{margin-top:20px;margin-bottom:12px}.simulation-panel>.report-kpis{margin-top:20px}.approval-panel textarea{display:block;min-width:240px;max-width:100%;width:100%;border:1px solid #d8e1e8;border-radius:6px;padding:10px;font:12px system-ui;color:var(--navy);resize:vertical}.approval-panel select{min-width:170px}.approval-panel input[type=checkbox]{width:18px;height:18px;accent-color:var(--teal)}.approval-panel button{white-space:nowrap}.approval-panel .table-scroll{max-height:440px}
 
+/* Phase 1.1 application shell */
+:root{--surface:#fff;--page:#f3f6f9;--surface-soft:#f7f9fb;--text:#192e40;--text-muted:#637889;--line:#e1e8ee;--accent:#127f76;--accent-soft:#e9f5f2;--sidebar-width:244px;--shell-shadow:0 3px 14px #1c3c5010;--navy:#192e40;--teal:#127f76;--muted:#637889;--border:#e1e8ee}
+body.command-app{background:var(--page);color:var(--text);font-size:14px}.command-app button,.command-app a,.command-app input,.command-app select,.command-app textarea{touch-action:manipulation}.command-app button{min-height:38px;border-radius:7px}.command-app button:focus-visible,.command-app a:focus-visible,.command-app summary:focus-visible{outline:3px solid #42b9b0;outline-offset:3px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.skip-link{position:fixed;left:16px;top:-100px;z-index:110;background:var(--accent);color:white;padding:12px;border-radius:5px}.skip-link:focus{top:12px}.app-sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-width);height:100dvh;background:#142c3d;color:#c3d2dd;z-index:80;display:flex;flex-direction:column;padding:27px 16px 16px;overflow-y:auto;border-right:1px solid #263f50}.app-brand{display:flex;align-items:center;gap:12px;color:white;text-decoration:none;padding:0 7px 30px;white-space:nowrap}.app-brand-mark{background:#168b7f;color:white;border-radius:10px;width:39px;height:39px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;font-weight:800;letter-spacing:-1px}.app-brand-mark>span{padding:0 2px;color:#86e5d8}.brand-copy{font-size:15px;font-weight:700}.brand-copy small{display:block;font-size:8px;letter-spacing:1.5px;font-weight:500;color:#90a8ba;margin-top:5px}.sidebar-caption{font-size:9px;letter-spacing:1.8px;margin:2px 16px 15px;color:#8da5b7;font-weight:650}.app-nav{display:grid;gap:5px}.app-nav button{display:flex;align-items:center;gap:13px;border:0;background:transparent;color:#bdd0de;text-align:left;padding:12px 14px;font-size:12px;font-weight:550;min-height:46px;width:100%;position:relative}.app-nav button svg{width:19px;height:19px;flex-shrink:0}.app-nav button:hover{background:#203d50;filter:none;color:white}.app-nav button[aria-current=page]{background:#1b4c51;color:#a1f1df}.app-nav button[aria-current=page]:before{content:'';width:3px;height:20px;background:#59d4bc;position:absolute;left:-16px;border-radius:0 3px 3px 0}.app-nav button:last-child{margin-top:22px;border-top:1px solid #2b4354;border-radius:0;padding-top:19px;min-height:58px}.sidebar-bottom{margin-top:auto;padding-top:35px}.privacy-note{display:flex;gap:12px;align-items:center;font-size:10px;padding:15px 9px;color:#bed1de;line-height:1.6}.privacy-note small{display:block;color:#8da5b7;font-size:9px}.privacy-symbol{font-size:24px;color:#64ccba}.sidebar-bottom>button{display:flex;align-items:center;gap:13px;padding:9px 14px;background:transparent;color:#a2b8c8;border:1px solid #354d5c;width:100%;font-size:11px}.sidebar-bottom>button>span:first-child{font-size:23px;line-height:1}.app-frame{margin-left:var(--sidebar-width);min-width:0}.app-topbar{background:var(--surface);border-bottom:1px solid var(--line);padding:17px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:88px}.topbar-identity{display:flex;align-items:center;gap:10px;min-width:0}.topbar-title{font-size:13px;font-weight:700;display:block;line-height:1.5}.topbar-identity small{display:block;color:var(--text-muted);font-size:10px;margin-top:3px}.topbar-controls{display:flex;gap:12px;align-items:center;min-width:0}.topbar-controls>label{font-size:9px;color:var(--text-muted);min-width:106px;flex:1}.topbar-controls select{margin-top:3px;font-size:11px;padding:7px 22px 7px 8px;min-height:32px;background:var(--surface-soft);border-color:var(--line);color:var(--text);border-radius:5px;max-width:160px}.topbar-period{border:1px solid var(--line);border-radius:6px;padding:4px 7px 7px;display:flex;gap:4px;align-items:center;margin:0;min-width:0;background:var(--surface-soft)}.topbar-period legend{font-size:9px;color:var(--text-muted);padding:0 4px}.topbar-period input{margin:0;min-height:26px;width:105px;font:10px system-ui;padding:2px;border:0;background:transparent;color:var(--text);border-radius:3px}.topbar-period>span{font-size:10px;color:var(--text-muted)}.topbar-tools{display:flex;gap:10px;align-items:center}.workspace-status{white-space:nowrap;color:var(--accent);background:var(--accent-soft);padding:7px 9px;font-size:9px;font-weight:600;border-radius:20px}.workspace-status.status-warning{background:#fff1dc;color:#815921}.icon-button{display:grid;place-items:center;background:var(--surface-soft);color:var(--text);border:1px solid var(--line);width:34px;height:34px;min-height:34px!important;padding:0;font-size:20px}#cc-menu{display:none}.command-app main.app-main{max-width:1700px;padding:32px 30px 20px;margin:0 auto;outline:none;min-width:0}.page-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:15px}.page-heading .eyebrow{font-size:9px;letter-spacing:1.5px;margin-bottom:8px;color:var(--accent)}.page-heading h1{font-size:27px;letter-spacing:-.8px;margin-bottom:8px}.page-heading p:not(.eyebrow){font-size:12px;color:var(--text-muted);margin:0;line-height:1.6}.workspace-local{font-size:10px;color:var(--text-muted);white-space:nowrap}.context-note{font-size:10px;color:var(--text-muted);line-height:1.6;margin:0 0 26px;padding-left:11px;border-left:2px solid #c5d9df}.overview-intro{background:linear-gradient(110deg,#e9f4f1,#f5faf9);border:1px solid #dcebe7;border-radius:11px;padding:24px 26px;display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:22px}.overview-intro h2{font-size:21px;letter-spacing:-.5px;margin-top:11px}.overview-intro p{font-size:12px;color:var(--text-muted);line-height:1.7;max-width:570px;margin-bottom:0}.overview-actions{display:flex;gap:8px;flex-direction:column;flex-shrink:0}.overview-actions button{font-size:11px;padding:10px 15px}.overview-actions .secondary{background:transparent}.module-status{display:inline-block;font-size:9px;font-weight:650;border-radius:4px;padding:5px 8px;line-height:1.3}.module-status.available{background:var(--accent-soft);color:var(--accent)}.module-status.planned{background:#edf1f5;color:#697b8b}.overview-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:22px}.overview-card{position:relative;border:1px solid var(--line);border-radius:10px;padding:19px 19px 16px;background:var(--surface);box-shadow:0 2px 6px #193c4e05;min-width:0;min-height:157px}.overview-card h3{font-size:11px;color:var(--text-muted);padding-right:16px;font-weight:600}.overview-mark{position:absolute;right:17px;top:16px;font-size:16px;color:#a3b5c1}.overview-card.available{border-top:2px solid var(--accent)}.overview-card.available .overview-mark{color:var(--accent)}.overview-value{font-size:29px;line-height:1.3;font-weight:700;letter-spacing:-1px;margin-top:20px}.overview-value>span{font-size:13px;font-weight:500;letter-spacing:0;color:var(--text-muted);margin-left:5px}.overview-card>p{font-size:10px;color:var(--text-muted);line-height:1.6;margin:10px 0 0}.overview-lower{display:grid;grid-template-columns:1.15fr 1fr;gap:20px}.command-app .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shell-shadow);padding:22px}.command-app .section-heading{margin-bottom:20px}.command-app .section-heading h2{font-size:14px}.command-app .section-heading p{color:var(--text-muted);font-size:11px}.workflow-list{display:grid;gap:20px;margin:25px 0}.workflow-list>div{display:flex;gap:13px;align-items:flex-start}.workflow-list>div>span{width:29px;height:29px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;font-size:10px;font-weight:650;color:var(--accent);flex-shrink:0}.workflow-list strong{font-size:12px}.workflow-list p{font-size:11px;color:var(--text-muted);line-height:1.6;margin:5px 0 0}.overview-readiness>h2{font-size:14px}.overview-readiness ul{list-style:none;padding:0;margin:20px 0}.overview-readiness li{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:13px 0;font-size:11px}.privacy-banner{border-radius:6px;background:var(--surface-soft);color:var(--text-muted);font-size:10px;line-height:1.7;padding:14px;margin-top:20px}.app-footer{border-top:1px solid var(--line);padding-top:18px;margin-top:30px;font-size:9px;color:var(--text-muted);display:flex;justify-content:space-between;gap:15px}.planned-hero{max-width:900px;padding:30px!important}.planned-hero h2{font-size:23px;margin:19px 0 13px}.planned-hero>p{font-size:13px;line-height:1.8;color:var(--text-muted);max-width:650px}.planned-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px}.planned-feature>h3{font-size:13px;color:var(--text)}.planned-feature>p{font-size:11px;color:var(--text-muted);margin:12px 0 20px}.settings-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:22px}.settings-grid h2{font-size:17px;margin:16px 0}.settings-grid p{color:var(--text-muted);line-height:1.8;font-size:12px}.setting-row{display:flex;justify-content:space-between;gap:15px;align-items:center;border-top:1px solid var(--line);padding:20px 0}.setting-row h3{color:var(--text);font-size:12px}.setting-row p{font-size:11px;margin:6px 0 0}.setting-row button{font-size:10px;flex-shrink:0}.context-guard h2{font-size:18px;margin-bottom:14px}.context-guard p{font-size:13px;line-height:1.8;color:var(--text-muted)}.command-app .workspace-bar{background:var(--surface);border:1px solid var(--line);padding:10px 12px;border-radius:9px;margin-bottom:20px}.command-app .workspace-tabs{background:var(--surface-soft)}.command-app .workspace-tabs button[aria-pressed=true]{background:var(--surface);color:var(--accent)}.report-tool{border:1px solid var(--line);background:var(--surface);border-radius:9px;margin:18px 0;min-width:0;box-shadow:0 1px 3px #193c4e05}.report-tool>summary{cursor:pointer;font-size:12px;font-weight:650;padding:17px 20px;color:var(--text);list-style-position:inside}.report-tool>summary::marker{color:var(--accent)}.report-tool>.panel,.report-tool>.sla-comparison{margin:0;border:0;box-shadow:none;border-radius:0 0 9px 9px}.report-tool>section+section{border-top:1px solid var(--line)!important}.command-app .report-kpis,.command-app .kpi-grid{gap:13px}.command-app .kpi{background:var(--surface);border-color:var(--line);box-shadow:0 2px 4px #17354b05}.command-app .metric{font-size:30px}.command-app .metric>span{font-size:13px}.command-app .formula{border-color:var(--line);color:var(--text-muted)}.command-app .fields{gap:14px}.command-app label{color:var(--text);font-size:11px}.command-app input,.command-app select,.command-app textarea{color:var(--text);background:var(--surface-soft);border-color:var(--line)}.command-app .secondary{background:var(--surface);border-color:var(--line);color:var(--text)}.command-app .helper{color:var(--text-muted)}.command-app .report-intro h2{font-size:18px}.command-app .report-intro .eyebrow{font-size:9px}.command-app .quality-card,.command-app .management-stat{background:var(--surface-soft);border-color:var(--line)}.command-app .quality-card strong{color:var(--text)}.command-app .management-stat strong{font-size:20px}.command-app .table-scroll{border-color:var(--line)}.command-app caption{background:var(--surface-soft);color:var(--text-muted)}.command-app thead th{background:var(--surface-soft);color:var(--text-muted)}.command-app th,.command-app td{border-color:var(--line)}.command-app .point-detail{background:var(--surface-soft);color:var(--text-muted)}.command-app .donut>div{background:var(--surface)}.command-app .report-settings{margin-top:0;margin-bottom:20px}.command-app .results-heading{margin-top:22px}.sidebar-collapsed{--sidebar-width:78px}.sidebar-collapsed .app-sidebar{padding-left:12px;padding-right:12px}.sidebar-collapsed .app-brand{padding-left:7px;padding-right:0}.sidebar-collapsed .app-sidebar .nav-label,.sidebar-collapsed .brand-copy{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.sidebar-collapsed .app-nav button{justify-content:center;padding-left:0;padding-right:0}.sidebar-collapsed .privacy-note{padding-left:13px}.sidebar-collapsed #cc-collapse{justify-content:center;padding:5px}.sidebar-collapsed #cc-collapse>span:first-child{transform:rotate(180deg)}.sidebar-backdrop{position:fixed;inset:0;background:#09223388;z-index:70}
+/* Theme uses the same semantic surfaces across the shell and the existing Calls tools. */
+html[data-theme=dark]{color-scheme:dark;--surface:#192c3b;--page:#11212e;--surface-soft:#203644;--text:#e2edf5;--text-muted:#a2b7c8;--line:#354b5c;--accent:#61d2be;--accent-soft:#193f40;--navy:#e2edf5;--muted:#a2b7c8;--border:#354b5c;--teal:#61d2be;--good:#9ee8ca;--bad:#ffb8a4;--shell-shadow:0 3px 14px #06131b22}html[data-theme=dark] .overview-intro{background:linear-gradient(110deg,#183d3d,#1b303e);border-color:#30534f}html[data-theme=dark] .module-status.planned{background:#2a4050;color:#b2c4d1}html[data-theme=dark] .command-app button:not(.secondary):not(.icon-button):not([data-cc-module]):not(#cc-collapse){background:#257c72;border-color:#3f9b8c;color:#fff}html[data-theme=dark] .command-app .metric-icon,html[data-theme=dark] .command-app .badge.good{background:#1c4840;color:#a6ead3}html[data-theme=dark] .command-app .badge.info,html[data-theme=dark] .command-app .badge.neutral{background:#2a4358;color:#b7d3ee}html[data-theme=dark] .command-app .badge.bad{background:#57362b;color:#ffd1b5}html[data-theme=dark] .command-app .insight,html[data-theme=dark] .command-app .sla-comparison{background:#1b3b37;border-color:#3b6156;color:#b5d8cf}html[data-theme=dark] .command-app .insight h2,html[data-theme=dark] .command-app .insight p{color:#b5d8cf}html[data-theme=dark] .command-app .simulation-panel{background:#342f25;border-color:#b68c4d}html[data-theme=dark] .command-app .simulation-panel .eyebrow{color:#f0c680}html[data-theme=dark] .command-app .target-breach,html[data-theme=dark] .command-app .badge.bad{background:#57362b!important;color:#ffd1b5!important}html[data-theme=dark] .command-app .significant-gap,html[data-theme=dark] .command-app .sla-mismatch td.reported-sla,html[data-theme=dark] .command-app .sla-mismatch td.sla-difference,html[data-theme=dark] .command-app .sla-mismatch td.calculated-sla{background:#514328;color:#f5d198}html[data-theme=dark] .command-app .excluded-row,html[data-theme=dark] .command-app .coverage-warning,html[data-theme=dark] .command-app .has-differences{background:#4a3927;color:#f1d19d}html[data-theme=dark] .command-app .error{background:#542e2d;color:#ffcebd}html[data-theme=dark] .command-app .track{background:#304959}html[data-theme=dark] .command-app .marker{border-color:#e4edf5}html[data-theme=dark] .command-app .results-heading>span{background:#294251;color:#b9ceda}html[data-theme=dark] .command-app h3,html[data-theme=dark] .command-app .quality-card p,html[data-theme=dark] .command-app .legend-row small,html[data-theme=dark] .command-app .bar-label{color:var(--text-muted)}html[data-theme=dark] .command-app .trend-point:focus circle:last-child{stroke:#fff}html[data-theme=dark] .command-app .report-settings input:disabled{background:#253d4d;color:#a0b8c9}html[data-theme=dark] .command-app .mini-tag{background:#294251;color:#bdd0dd}
+@media(min-width:1500px){.app-topbar{gap:30px;padding-left:36px;padding-right:36px}.command-app main.app-main{padding-left:36px;padding-right:36px}.topbar-controls>label{min-width:130px}.topbar-controls select{max-width:190px}.topbar-period input{width:119px}}
+@media(max-width:1270px){.app-topbar{flex-wrap:wrap;gap:12px 16px}.topbar-identity{flex:1}.topbar-controls{order:3;flex-basis:100%;justify-content:flex-start}.topbar-controls select{max-width:none}.topbar-controls>label{flex:1}.topbar-tools{margin-left:auto}.topbar-period input{width:125px}.overview-actions{min-width:150px}.overview-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.command-app .report-kpis,.command-app .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.command-app .report-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.command-app .fields{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1050px){:root{--sidebar-width:215px}.sidebar-collapsed{--sidebar-width:78px}.command-app main.app-main{padding:26px 22px}.app-topbar{padding:16px 22px}.topbar-period input{width:107px}.topbar-controls{flex-wrap:wrap}.topbar-period{flex:1}.overview-intro{flex-direction:column;align-items:flex-start}.overview-actions{flex-direction:row;width:100%;min-width:0}.overview-lower,.settings-grid{grid-template-columns:minmax(0,1fr)}.planned-grid{grid-template-columns:minmax(0,1fr)}.workspace-local{display:none}.overview-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.app-sidebar{width:244px;transform:translateX(-100%)}.app-frame{margin-left:0}.sidebar-open .app-sidebar{transform:translateX(0)}.sidebar-collapsed .app-sidebar .nav-label,.sidebar-collapsed .brand-copy{position:static;width:auto;height:auto;clip-path:none}.sidebar-collapsed .app-nav button{justify-content:flex-start;padding-left:14px;padding-right:14px}.sidebar-collapsed .app-brand{padding:0 7px 30px}.sidebar-collapsed #cc-collapse{display:none}#cc-menu{display:grid}.app-topbar{padding:13px 18px}.topbar-title{font-size:12px}.topbar-identity small{font-size:9px}.topbar-controls{gap:9px}.topbar-controls>label{min-width:100px}.topbar-period{flex-basis:100%;justify-content:space-between;margin-top:4px}.topbar-period input{width:44%;font-size:11px}.topbar-tools{gap:6px}.workspace-status{font-size:8px;padding:6px}.command-app main.app-main{padding:24px 18px 18px}.page-heading h1{font-size:25px}.page-heading p:not(.eyebrow){font-size:11px}.context-note{font-size:9px;margin-bottom:20px}.overview-intro{padding:21px 18px}.overview-intro h2{font-size:19px}.overview-intro p{font-size:11px}.overview-actions{flex-wrap:wrap}.overview-actions button{flex:1;font-size:10px;padding:10px 9px}.overview-card{padding:17px 14px;min-height:151px}.overview-card h3{font-size:10px}.overview-mark{right:12px}.overview-value{font-size:27px}.overview-card>p{font-size:9px}.overview-kpis{gap:11px}.command-app .panel{padding:19px}.command-app .fields{grid-template-columns:repeat(2,minmax(0,1fr))}.command-app .fields>label:last-child{grid-column:1/-1}.command-app .workspace-bar{padding:9px;gap:9px}.command-app .report-filters label:last-child{grid-column:1/-1}.command-app .report-kpis,.command-app .kpi-grid{gap:10px}.command-app .report-kpis .metric{font-size:25px}.command-app .metric{font-size:28px}.report-tool>summary{padding:16px;font-size:11px}.command-app .management-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.app-footer{flex-direction:column;gap:4px;font-size:8px}.planned-hero h2{font-size:21px}.setting-row{flex-wrap:wrap}.sidebar-open{overflow:hidden}}
+@media(max-width:370px){.topbar-title{max-width:170px}.topbar-tools .workspace-status{display:none}.command-app main.app-main{padding-left:14px;padding-right:14px}.overview-actions{flex-direction:column}.overview-kpis{gap:9px}.command-app .report-filters{grid-template-columns:minmax(0,1fr)}.command-app .report-kpis,.command-app .kpi-grid{grid-template-columns:minmax(0,1fr)}.command-app .management-grid{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:no-preference){.app-sidebar,.app-frame{transition:transform .18s,margin-left .18s,width .18s}.app-nav button,.overview-card{transition:background .15s}}
+.button-arrow{vertical-align:middle;margin-left:5px}.topbar-controls>label:first-child{min-width:160px}html[data-theme=dark] #ziwo-trend text{fill:var(--text-muted)}
+
 </style>
 <!-- END EMBEDDED STYLES -->
 </head>
-<body>
-  <header class="topbar"><a class="brand" href="index.html"><span class="brand-icon" aria-hidden="true">◈</span> Call Center <span class="brand-sub">/ Operations</span></a><span class="local-badge">● Local workspace</span></header>
-  <main>
-    <div class="heading"><div><p class="eyebrow">TEAM PERFORMANCE</p><h1>Your calls. A clearer picture.</h1><p class="subtitle">Turn your call activity into actionable performance insights.</p></div><span class="period">Performance overview</span></div>
+<body class="command-app">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div id="cc-backdrop" class="sidebar-backdrop" hidden></div>
+<aside id="cc-sidebar" class="app-sidebar" aria-label="Application sidebar">
+  <a class="app-brand" href="#overview" aria-label="Command Center home"><span class="app-brand-mark">C<span>·</span>C</span><span class="brand-copy">Command Center<small>PERFORMANCE WORKSPACE</small></span></a>
+  <p class="sidebar-caption nav-label">WORKSPACE</p>
+  <nav class="app-nav" aria-label="Performance modules"><button type="button" data-cc-module="overview" aria-label="Overview" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7v11h-6v-7H9v7H3Z"/></svg><span class="nav-label">Overview</span></button><button type="button" data-cc-module="calls" aria-label="Calls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4v4c0 7 6 13 13 13h4v-4l-5-2-2 2-6-6 2-2Z"/></svg><span class="nav-label">Calls</span></button><button type="button" data-cc-module="emails" aria-label="Emails"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18v14H3Zm0 0 9 8 9-8"/></svg><span class="nav-label">Emails</span></button><button type="button" data-cc-module="quality" aria-label="Quality"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9S4 17 4 12V6Zm-4 9 3 3 5-6"/></svg><span class="nav-label">Quality</span></button><button type="button" data-cc-module="csat" aria-label="CSAT & DSAT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM8 14c2 4 6 4 8 0M8 9h1m6 0h1"/></svg><span class="nav-label">CSAT & DSAT</span></button><button type="button" data-cc-module="agents" aria-label="Agent Performance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 21v-5c0-5 12-5 12 0v5m3-16c4 1 4 5 0 6m1 3c3 1 3 4 3 7"/></svg><span class="nav-label">Agent Performance</span></button><button type="button" data-cc-module="reports" aria-label="Management Reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18H5Zm4 4h6m-6 4h6m-6 4h6"/></svg><span class="nav-label">Management Reports</span></button><button type="button" data-cc-module="settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1Z"/></svg><span class="nav-label">Settings</span></button></nav>
+  <div class="sidebar-bottom"><div class="privacy-note"><span class="privacy-symbol" aria-hidden="true">◈</span><span class="nav-label">Your workspace. Your data.<small>Reports stay in this browser.</small></span></div><button type="button" id="cc-collapse" aria-controls="cc-sidebar" aria-expanded="true" aria-label="Collapse sidebar"><span aria-hidden="true">«</span><span class="nav-label">Collapse sidebar</span></button></div>
+</aside>
+<div class="app-frame">
+<header class="app-topbar"><div class="topbar-identity"><button id="cc-menu" type="button" class="icon-button" aria-label="Open navigation" aria-controls="cc-sidebar" aria-expanded="false">☰</button><div><span class="topbar-title">Contact Center Command Center</span><small>Personal performance management</small></div></div><div class="topbar-controls"><label for="cc-account">Account<select id="cc-account"><option value="Relaam">Relaam</option><option value="MAF Entertainment">MAF Entertainment</option><option value="Other">Other / Future account</option></select></label><label for="cc-site">Site<select id="cc-site"><option value="All sites">All sites</option><option value="UAE">UAE</option><option value="Egypt">Egypt</option></select></label><fieldset class="topbar-period"><legend>Reporting range</legend><label class="sr-only" for="cc-from">Reporting start date</label><input id="cc-from" type="date"><span aria-hidden="true">—</span><label class="sr-only" for="cc-through">Reporting end date</label><input id="cc-through" type="date"></fieldset></div><div class="topbar-tools"><span id="cc-workspace-status" class="workspace-status">Browser only</span><button id="cc-theme" class="icon-button" type="button" aria-label="Switch to dark mode" aria-pressed="false">◐</button></div></header>
+<main id="main-content" class="app-main" tabindex="-1">
+<div class="page-heading"><div><p class="eyebrow" id="cc-breadcrumb">WORKSPACE / OVERVIEW</p><h1 id="cc-page-title">Performance overview</h1><p id="cc-page-description">One workspace for your contact center. A clear view of what matters.</p></div><span class="workspace-local">● Local browser workspace</span></div>
+<p id="cc-context-note" class="context-note">Account and Site identify your report context. All sites is an unspecified label, not a combined UAE/Egypt calculation.</p>
+<section id="module-overview" class="module-page" data-module-page="overview" aria-labelledby="overview-title">
+<div class="overview-intro"><div><span class="module-status available">CALLS ANALYTICS AVAILABLE</span><h2 id="overview-title">Your operation, at a glance.</h2><p id="cc-overview-source">Import a Ziwo report to see official Calls performance here. Other channels are not yet operational.</p></div><div class="overview-actions"><button id="cc-open-ziwo" type="button">Upload Ziwo report <svg class="button-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 19 14-14M9 5h10v10"/></svg></button><button class="secondary" type="button" data-open-calls="manual">Manual Calls entry</button></div></div>
+<div class="overview-kpis" id="cc-overview-kpis" aria-live="polite"></div>
+<div class="overview-lower"><section class="panel overview-activity"><div class="section-heading"><div><h2>Calls workspace</h2><p>One complete workflow, from report to management insight.</p></div><span class="module-status available">Operational</span></div><div class="workflow-list"><div><span>01</span><div><strong>Import &amp; validate</strong><p>Local Ziwo CSV or Excel reports, with date and value checks.</p></div></div><div><span>02</span><div><strong>Review official performance</strong><p>Count-based SLA, weighted talk time, trends and daily results.</p></div></div><div><span>03</span><div><strong>Investigate &amp; report</strong><p>Approval records, separate simulations and Excel exports.</p></div></div></div><button class="secondary" data-open-calls="ziwo" type="button">Open Calls workspace →</button></section><section class="panel overview-readiness"><h2>Workspace readiness</h2><p class="helper">Availability reflects implemented features, not live service status.</p><ul><li><span>Calls analytics</span><span class="module-status available">Available</span></li><li><span>Emails</span><span class="module-status planned">Planned</span></li><li><span>Quality &amp; customer experience</span><span class="module-status planned">Planned</span></li><li><span>Agent performance</span><span class="module-status planned">Planned</span></li></ul><div class="privacy-banner">Private by design. Imports and exports run locally. No report data is stored remotely.</div></section></div>
+</section>
+<section id="module-calls" class="module-page" data-module-page="calls" hidden aria-label="Calls module">
+<div id="cc-context-guard" class="panel context-guard" hidden><h2>Report retained in another context</h2><p id="cc-context-guard-message"></p><button id="cc-return-context" type="button">Return to report context</button><button id="cc-replace-context" class="secondary" type="button">Replace with a report for the selected context</button><p class="helper">No records have been merged, filtered, relabeled, or discarded. Switching modules preserves the report. Return to its Account/Site to continue.</p></div>
+<div id="calls-context-content">
     <div class="workspace-bar">
       <div class="workspace-tabs" role="group" aria-label="Dashboard workspace"><button id="manual-tab" class="secondary" aria-pressed="true">Manual entry</button><button id="report-tab" class="secondary" aria-pressed="false">Ziwo reports</button></div>
       <button id="ziwo-upload" type="button">Upload Ziwo Report</button>
@@ -95,8 +126,12 @@
     </div>
     <section class="insight" aria-live="polite"><span class="insight-icon" aria-hidden="true"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m5 19 14-14M9 5h10v10"/></svg></span><div><h2>Team insight</h2><p id="insight"></p></div></section>
     </div>
-    <footer><span>Call Center KPI Dashboard</span><span>Private by design. Your data stays in this browser tab.</span></footer>
-  </main>
+
+</div></section>
+<section id="module-emails" class="module-page" data-module-page="emails" hidden aria-labelledby="emails-title"><div class="panel planned-hero"><span class="module-status planned">Not yet operational</span><h2 id="emails-title">Email performance, without the guesswork.</h2><p>Email imports, SLA tracking, response time and backlog analysis are planned.</p><p class="helper">No live KPI data is available for this module. Values will remain unavailable until its import and calculation workflow is implemented.</p></div><div class="planned-grid"><article class="panel planned-feature"><h3>Email report import</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>First-response SLA</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>Backlog & productivity</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article></div></section><section id="module-quality" class="module-page" data-module-page="quality" hidden aria-labelledby="quality-title"><div class="panel planned-hero"><span class="module-status planned">Not yet operational</span><h2 id="quality-title">Better conversations start with clear standards.</h2><p>Audit imports, quality scoring and coaching workflows are planned.</p><p class="helper">No live KPI data is available for this module. Values will remain unavailable until its import and calculation workflow is implemented.</p></div><div class="planned-grid"><article class="panel planned-feature"><h3>Quality audit import</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>Audit scorecards</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>Coaching follow-up</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article></div></section><section id="module-csat" class="module-page" data-module-page="csat" hidden aria-labelledby="csat-title"><div class="panel planned-hero"><span class="module-status planned">Not yet operational</span><h2 id="csat-title">Understand the customer experience.</h2><p>Survey imports, satisfaction measures and dissatisfaction analysis are planned.</p><p class="helper">No live KPI data is available for this module. Values will remain unavailable until its import and calculation workflow is implemented.</p></div><div class="planned-grid"><article class="panel planned-feature"><h3>Survey report import</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>CSAT & DSAT analysis</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>Customer feedback</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article></div></section><section id="module-agents" class="module-page" data-module-page="agents" hidden aria-labelledby="agents-title"><div class="panel planned-hero"><span class="module-status planned">Not yet operational</span><h2 id="agents-title">A clearer view of individual performance.</h2><p>Agent-level imports, scorecards and comparisons are planned.</p><p class="helper">No live KPI data is available for this module. Values will remain unavailable until its import and calculation workflow is implemented.</p></div><div class="planned-grid"><article class="panel planned-feature"><h3>Agent data import</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>Individual scorecards</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>Performance comparisons</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article></div></section><section id="module-reports" class="module-page" data-module-page="reports" hidden aria-labelledby="reports-title"><div class="panel planned-hero"><span class="module-status planned">Not yet operational</span><h2 id="reports-title">Bring the story together.</h2><p>Cross-channel management reports are planned. Existing Calls summaries and Excel exports are operational in Calls.</p><p class="helper">No live KPI data is available for this module. Values will remain unavailable until its import and calculation workflow is implemented.</p><button class="secondary" type="button" data-open-calls="reports">Open existing Calls reports</button></div><div class="planned-grid"><article class="panel planned-feature"><h3>Cross-channel summary</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>Report templates</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article><article class="panel planned-feature"><h3>Management report builder</h3><p>Planned for a future phase</p><span class="module-status planned">Unavailable</span></article></div></section>
+<section id="module-settings" class="module-page" data-module-page="settings" hidden aria-labelledby="settings-title"><div class="settings-grid"><section class="panel"><span class="module-status available">Available</span><h2 id="settings-title">Workspace preferences</h2><p class="helper">Only interface preferences and the existing Account/Site labels are saved locally. Imported reports and approval records stay in memory.</p><div class="setting-row"><div><h3>Dark appearance</h3><p>Switch between light and dark workspaces.</p></div><button id="cc-settings-theme" type="button" class="secondary" aria-pressed="false">Enable dark mode</button></div><div class="setting-row"><div><h3>Sidebar</h3><p>Choose a compact sidebar on desktop.</p></div><button id="cc-settings-collapse" type="button" class="secondary">Toggle sidebar width</button></div></section><section class="panel"><h2>Reporting configuration</h2><p>Existing KPI targets and SLA formula choices remain in Calls. This redesign does not change them.</p><button class="secondary" type="button" data-open-calls="ziwo">Open Calls configuration</button><div class="privacy-banner">There is no backend or account synchronization. Account and Site labels do not verify or combine report origins.</div></section></div></section>
+<footer class="app-footer"><span>Personal Contact Center Command Center · Phase 1.1</span><span>Browser-local analytics · Original report data preserved</span></footer>
+</main></div>
 <!-- BEGIN EMBEDDED SCRIPTS -->
 <script>
 (function(root){
@@ -138,6 +173,7 @@
 const { calculate, SAMPLE } = CallCenter;
 const $ = id => document.getElementById(id);
 const inputs = [...document.querySelectorAll('#activity input')];
+let manualContext = null;
 const number = value => value.toLocaleString('en-US', { maximumFractionDigits: 1 });
 const specs = [
   { key: 'sla', title: 'Service level', unit: '%', target: 'Target ≥ 90%', formula: 'Within SLA ÷ offered × 100', icon: '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>' },
@@ -184,10 +220,11 @@ function render(source) {
   }).join('');
   const missed = valid ? specs.slice(0, 3).filter(spec => result.targets[spec.key] === false).map(spec => spec.title.toLowerCase()) : [];
   $('insight').textContent = result.error ? 'Correct the call activity above to see your performance insights.' : !data.offered ? 'Enter your call activity or load sample data to see how your team is performing. A dash means there is no data to calculate a result.' : missed.length ? `Focus on ${missed.join(' and ')}. Review the highlighted KPIs against their targets to identify your next coaching opportunity.` : result.targets.aht === null ? 'Percentage targets are on track. Average handling time needs at least one answered call.' : 'All three performance targets are on track. Keep an eye on these measures throughout your reporting period.';
+  document.dispatchEvent(new CustomEvent('calls:manual', { detail: { metrics: {...metrics}, source, context: manualContext } }));
 }
-function load(data, source) { inputs.forEach(input => { input.value = data[input.name]; }); render(source); }
+function load(data, source) { manualContext = window.CommandCenter?.context() || null; inputs.forEach(input => { input.value = data[input.name]; }); render(source); }
 $('activity').addEventListener('submit', event => event.preventDefault());
-$('activity').addEventListener('input', () => render('Your data · updated live'));
+$('activity').addEventListener('input', () => { manualContext = window.CommandCenter?.context() || null; render('Your data · updated live'); });
 $('sample').addEventListener('click', () => load(SAMPLE, 'Sample data'));
 $('reset').addEventListener('click', () => load({ offered: 0, answered: 0, withinSla: 0, abandoned: 0, handling: 0 }, 'No call activity'));
 load(SAMPLE, 'Sample data');
@@ -710,7 +747,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
 (function () {
   'use strict';
   const z = id => document.getElementById(id);
-  const state = { rows: [], excluded: new Set(), workbook: null, source: '', metric: 'sla', page: 0, chartPage: 0, ticket: 0, lastFile: null, rangeFrom: '', validation: null, analysis: null, performancePage: 0, performance: [], dropThreshold: 10, discrepancyThreshold: 1, approvals: new Map(), approvalDates: [] };
+  const state = { rows: [], excluded: new Set(), workbook: null, source: '', metric: 'sla', page: 0, chartPage: 0, ticket: 0, lastFile: null, rangeFrom: '', validation: null, analysis: null, performancePage: 0, performance: [], dropThreshold: 10, discrepancyThreshold: 1, approvals: new Map(), approvalDates: [], context: null };
   const PAGE = 50, CHART_PAGE = 90;
   const delta = DashboardFormat.pp;
   const rate = DashboardFormat.fixed;
@@ -718,18 +755,20 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
   const today = () => { const date = new Date(); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; };
   window.DashboardTargets = { ...Ziwo.DEFAULT_TARGETS };
   function workspace(report) {
+    document.dispatchEvent(new CustomEvent('calls:open'));
     z('report-workspace').hidden = !report; z('manual-workspace').hidden = report;
     z('manual-tab').setAttribute('aria-pressed', String(!report)); z('report-tab').setAttribute('aria-pressed', String(report));
+    document.dispatchEvent(new CustomEvent('calls:workspace'));
   }
   z('manual-tab').addEventListener('click', () => workspace(false));
   z('report-tab').addEventListener('click', () => workspace(true));
   z('ziwo-upload').addEventListener('click', () => { workspace(true); z('ziwo-file').click(); });
   function error(message) { z('ziwo-error').textContent = message; z('ziwo-error').hidden = !message; }
-  function setRows(rows, source) {
+  function setRows(rows, source, context = state.context) {
     // Check the entire report for overflow before replacing the current, valid dataset.
     Ziwo.aggregate(rows);
     state.validation = null; state.performancePage = 0;
-    state.rows = rows; state.source = source; state.excluded = new Set(); state.page = 0;
+    state.rows = rows; state.source = source; state.context = context; state.excluded = new Set(); state.page = 0;
     state.approvals = new Map(); state.approvalDates = []; z('approval-records').replaceChildren();
     syncApprovalDates();
     z('approval-feedback').textContent = '';
@@ -739,10 +778,12 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     z('ziwo-through').value = active.length ? active[active.length - 1].date : rows[rows.length - 1].date;
     z('report-content').hidden = false;
     error(''); renderReport(true);
+    document.dispatchEvent(new CustomEvent('ziwo:loaded', { detail: { source, context: state.context } }));
   }
   function status() { z('ziwo-status').textContent = `${state.source} · ${state.rows.length.toLocaleString()} original daily records retained in this tab. Uploading another valid report replaces this analysis. Nothing is saved remotely.`; }
   async function importFile(file) {
     const ticket = ++state.ticket;
+    const loadContext = window.CommandCenter?.context() || null;
     workspace(true); error('');
     z('ziwo-status').textContent = `Reading ${file.name} locally…`;
     try {
@@ -754,7 +795,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
         const table = Ziwo.parseCSV(new TextDecoder('utf-8', { fatal: true }).decode(buffer));
         if (ticket !== state.ticket) return;
         const rows = validatedRows(table, { dateFormat: z('ziwo-date-format').value });
-        setRows(rows, file.name); state.lastFile = file; state.workbook = null; z('ziwo-sheet-label').hidden = true;
+        setRows(rows, file.name, loadContext); state.lastFile = file; state.workbook = null; z('ziwo-sheet-label').hidden = true;
       } else {
         const workbook = await ZiwoXlsx.readWorkbook(await file.arrayBuffer());
         if (ticket !== state.ticket) return;
@@ -771,7 +812,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
         if (ticket !== state.ticket) return;
         if (!table) { if (firstError) throw firstError; throw new Error('No worksheet has all required Ziwo column headers in its first row. Select a worksheet or re-export the report.'); }
         z('ziwo-sheet').value = String(selected);
-        setRows(validatedRows(table, { dateFormat: z('ziwo-date-format').value }), `${file.name} / ${workbook.sheets[selected]}`);
+        setRows(validatedRows(table, { dateFormat: z('ziwo-date-format').value }), `${file.name} / ${workbook.sheets[selected]}`, loadContext);
       }
     } catch (e) {
       if (ticket !== state.ticket) return;
@@ -791,7 +832,8 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
   z('ziwo-date-format').addEventListener('change', () => { if (state.lastFile) importFile(state.lastFile); });
   z('ziwo-sample').addEventListener('click', () => {
     ++state.ticket; state.lastFile = null; state.workbook = null; z('ziwo-sheet-label').hidden = true;
-    setRows(Ziwo.normalizeRows(Ziwo.sampleTable(today())), 'Ziwo sample · synthetic demonstration data');
+    workspace(true);
+    setRows(Ziwo.normalizeRows(Ziwo.sampleTable(today())), 'Ziwo sample · synthetic demonstration data', window.CommandCenter?.context() || null);
   });
   const settings = () => ({ from: z('ziwo-from').value, through: z('ziwo-through').value, view: z('ziwo-view').value, formula: z('ziwo-formula').value, excluded: [] });
   function card(title, value, unit, note, good) {
@@ -809,6 +851,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
       analysis = Ziwo.analyze(state.rows, options);
     } catch (e) {
       z('adjusted-kpis').replaceChildren(); z('approval-impact').replaceChildren(); z('simulation-scope').textContent = 'Choose a valid reporting range.'; z('export-adjusted').disabled = true;
+      document.dispatchEvent(new CustomEvent('ziwo:invalid-range'));
       state.analysis = null; state.performance = []; z('export-performance').disabled = true; z('performance-records').replaceChildren(); z('performance-scope').textContent = 'Correct the date range to display and export results.';
       z('management-values').replaceChildren(); z('period-comparison').replaceChildren(); z('management-warnings').textContent = 'Choose a valid reporting range.';
       z('quality-scope').textContent = 'Quality checks paused: choose a valid date range. Original report data is still retained.'; z('quality-cards').replaceChildren();
@@ -849,6 +892,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     renderPerformance(analysis);
     renderManagement(analysis);
     syncApprovalDates(); renderApprovalRecords(); renderAdjusted();
+    document.dispatchEvent(new CustomEvent('ziwo:summary', { detail: { summary: {...analysis.summary}, from: analysis.start, through: options.through, source: state.source, context: state.context } }));
   }
   for (const id of ['ziwo-from', 'ziwo-through', 'ziwo-view', 'ziwo-formula']) z(id).addEventListener('change', () => {
     if (id === 'ziwo-from') state.rangeFrom = z('ziwo-from').value;
@@ -974,6 +1018,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
     try {
       const options = { ...settings(), from: state.analysis.start, source: state.source, targets: window.DashboardTargets, discrepancyThreshold: state.discrepancyThreshold };
       const tables = ZiwoReview.exportTables(state.performance, options);
+      if (state.context) tables[1].rows.push(['Report Account (label only)', state.context.account], ['Report Site (label only; not verified)', state.context.site]);
       tables[1].rows.push(['Official Inclusion Policy', 'All valid active dates included. Simulation choices and manually recorded approval statuses do not change official KPIs.']);
       tables.push(ZiwoApprovals.exportSheets(state.approvals, state.excluded, 'OFFICIAL PERFORMANCE'));
       tables[1].rows.push(['Daily Table Filter', z('performance-filter').selectedOptions[0].textContent]);
@@ -1058,6 +1103,7 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
       const options = {...settings(),from:analysis.start,excluded:[...state.excluded],source:state.source,targets:window.DashboardTargets,discrepancyThreshold:state.discrepancyThreshold};
       const performance = ZiwoReview.dailyPerformance(analysis.rows, options);
       const sheets = ZiwoReview.exportTables(performance, options); sheets[0].name = 'SIMULATION ONLY Adjusted';
+      if (state.context) sheets[1].rows.push(['Report Account (label only)', state.context.account], ['Report Site (label only; not verified)', state.context.site]);
       sheets[1].rows.push(['IMPORTANT', 'ADJUSTED SIMULATION ONLY. Not official performance. Approval statuses are manually entered and not proof of client approval.']);
       sheets.push(ZiwoApprovals.exportSheets(state.approvals, state.excluded, 'ADJUSTED SIMULATION ONLY'));
       const bytes = ZiwoExcel.workbook(sheets), url = URL.createObjectURL(new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
@@ -1123,60 +1169,167 @@ document.addEventListener('targetschange', () => render($('data-state').textCont
 })();
 
 </script>
-<!-- END EMBEDDED SCRIPTS -->
-<!-- Phase 1: personal command center (outside generated embedded assets) -->
-<style>
-.command-center{max-width:1440px;margin:20px auto 0;padding:0 5%;font-family:inherit}.command-shell{background:#fff;border:1px solid #e2e8ed;border-radius:12px;padding:18px 22px;box-shadow:0 3px 7px #1b3b5010}.command-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.command-title h2{font-size:18px;margin:0}.command-title p{font-size:12px;color:#667987;margin:6px 0 0}.command-controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}.command-controls label{flex:1;min-width:170px;font-size:12px}.command-controls select{margin-top:5px}.command-nav{display:flex;gap:8px;overflow-x:auto;margin-top:15px;padding-bottom:5px}.command-nav button{white-space:nowrap;background:#f4f7fa;border:1px solid #dce5ea;color:#142e40}.command-nav button[aria-current=page]{background:#148478;color:white;border-color:#148478}.command-message{margin-top:14px;padding:12px;border:1px solid #dce5ea;background:#f7fafb;border-radius:8px;color:#435d6d;font-size:12px;line-height:1.6}.command-message strong{color:#142e40}.command-upload{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.command-upload button{margin:0}.command-muted{color:#667987;font-size:11px}.command-center [hidden]{display:none!important}@media(max-width:650px){.command-center{padding:0 18px}.command-shell{padding:15px}.command-nav button{padding:9px 11px}}
-</style>
-<section class="command-center" aria-label="Contact center command center" id="command-center">
-<div class="command-shell">
-<div class="command-title"><div><h2>Contact Center Command Center</h2><p>Personal workspace · Phase 1 foundation · Existing call analytics preserved</p></div><span class="local-badge">Personal · Browser only</span></div>
-<div class="command-controls">
-<label>Account<select id="cc-account"><option value="Relaam">Relaam</option><option value="MAF Entertainment">MAF Entertainment</option><option value="Other">Other / Future account</option></select></label>
-<label>Site<select id="cc-site"><option value="All sites">All sites</option><option value="UAE">UAE</option><option value="Egypt">Egypt</option></select></label>
-</div>
-<nav class="command-nav" aria-label="Performance modules">
-<button type="button" data-cc-module="overview" aria-current="page">Overview</button>
-<button type="button" data-cc-module="calls">Calls</button>
-<button type="button" data-cc-module="emails">Emails</button>
-<button type="button" data-cc-module="quality">Quality</button>
-<button type="button" data-cc-module="csat">CSAT &amp; DSAT</button>
-<button type="button" data-cc-module="agents">Agent Performance</button>
-<button type="button" data-cc-module="reports">Management Reports</button>
-</nav>
-<div class="command-message" id="cc-module-message" role="status"><strong>Overview:</strong> Your existing Calls dashboard remains available below. Choose Calls to jump to the Ziwo workspace. Other modules are planned and will be implemented in later phases.</div>
-<div class="command-message command-upload"><div><strong>Data Upload Center · Calls</strong><div class="command-muted">Ziwo CSV/XLSX is supported today. Other report types are not yet imported.</div></div><button type="button" id="cc-open-ziwo">Go to Ziwo upload</button></div>
-<div class="command-muted" id="cc-context-note" style="margin-top:10px">Account and site are workspace labels only. They do not filter uploaded Ziwo data yet. Do not combine reports from different sites.</div>
-</div></section>
 <script>
-(function(){
-'use strict';
-const root=document.getElementById('command-center');
-const account=document.getElementById('cc-account'),site=document.getElementById('cc-site');
-const message=document.getElementById('cc-module-message');
-const descriptions={
-overview:'Your existing Calls dashboard remains available below. Other modules are planned and will be implemented in later phases.',
-calls:'Calls is available now. Use the existing Manual entry or Ziwo reports workspace below. Existing formulas, official and adjusted performance, approvals, trends, and Excel exports are unchanged.',
-emails:'Emails module is planned. Freshdesk upload, first-response SLA, backlog, and productivity are not yet implemented.',
-quality:'Quality module is planned. CC, EC, BC, NC audits and coaching tracking are not yet implemented.',
-csat:'CSAT & DSAT module is planned. Survey import and validation are not yet implemented.',
-agents:'Agent Performance is planned. Individual scorecards and agent-level reporting are not yet implemented.',
-reports:'Management Reports is planned. Existing Ziwo Excel exports remain available in the Calls workspace.'
-};
-function save(){try{localStorage.setItem('cc-personal-context-v1',JSON.stringify({account:account.value,site:site.value}));}catch(e){}}
-try{const stored=JSON.parse(localStorage.getItem('cc-personal-context-v1')||'null');if(stored){if([...account.options].some(o=>o.value===stored.account))account.value=stored.account;if([...site.options].some(o=>o.value===stored.site))site.value=stored.site;}}catch(e){}
-account.addEventListener('change',save);site.addEventListener('change',save);
-root.querySelectorAll('[data-cc-module]').forEach(btn=>btn.addEventListener('click',()=>{
-root.querySelectorAll('[data-cc-module]').forEach(b=>b.removeAttribute('aria-current'));btn.setAttribute('aria-current','page');
-const key=btn.dataset.ccModule;message.innerHTML='<strong>'+btn.textContent+':</strong> '+descriptions[key];
-if(key==='calls'){document.querySelector('.workspace-bar')?.scrollIntoView({behavior:'smooth',block:'start'});}
-}));
-document.getElementById('cc-open-ziwo').addEventListener('click',()=>{
-const existing=[...document.querySelectorAll('button')].find(b=>b.id!=='cc-open-ziwo'&&/Upload Ziwo Report/i.test(b.textContent||''));
-if(existing){existing.scrollIntoView({behavior:'smooth',block:'center'});existing.focus();}
-else{message.textContent='Find the existing Upload Ziwo Report control in the Calls workspace below.';}
-});
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const labels = { overview:'Performance overview', calls:'Calls', emails:'Emails', quality:'Quality', csat:'CSAT & DSAT', agents:'Agent Performance', reports:'Management Reports', settings:'Settings' };
+  const descriptions = { overview:'One workspace for your contact center. A clear view of what matters.', calls:'Manual Calls and Ziwo analytics. Official results stay separate from simulations.', emails:'Email service performance · planned module', quality:'Audit and coaching performance · planned module', csat:'Customer satisfaction and dissatisfaction · planned module', agents:'Individual performance and scorecards · planned module', reports:'Cross-channel management reporting · planned module', settings:'Appearance, local preferences and reporting configuration.' };
+  let module = 'overview', report = null, manual = null, loadedContext = null;
+  const context = () => ({ account:$('cc-account').value, site:$('cc-site').value });
+  const same = (a,b) => Boolean(a && b && a.account === b.account && a.site === b.site);
+  const contextLabel = value => `${value.account} / ${value.site}`;
+  function read(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
+  function store(key,value) { try { localStorage.setItem(key,JSON.stringify(value)); } catch { /* Reports still work when browser storage is unavailable. */ } }
+  const saved = read('cc-personal-context-v1');
+  for (const key of ['account','site']) if (saved && [...$('cc-'+key).options].some(option=>option.value===saved[key])) $('cc-'+key).value=saved[key];
+  function setTheme(dark) {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    for (const id of ['cc-theme','cc-settings-theme']) $(id).setAttribute('aria-pressed',String(dark));
+    $('cc-theme').setAttribute('aria-label',dark ? 'Switch to light mode' : 'Switch to dark mode');
+    $('cc-settings-theme').textContent = dark ? 'Use light mode' : 'Enable dark mode';
+    store('cc-theme-v1',dark ? 'dark' : 'light');
+  }
+  setTheme(read('cc-theme-v1') === 'dark');
+  for (const id of ['cc-theme','cc-settings-theme']) $(id).addEventListener('click',()=>setTheme(document.documentElement.dataset.theme!=='dark'));
+  function collapse(value) {
+    document.body.classList.toggle('sidebar-collapsed',value);
+    $('cc-collapse').setAttribute('aria-expanded',String(!value));
+    $('cc-collapse').setAttribute('aria-label',value ? 'Expand sidebar' : 'Collapse sidebar');
+    $('cc-collapse').querySelector('.nav-label').textContent=value ? 'Expand sidebar' : 'Collapse sidebar';
+    store('cc-sidebar-collapsed-v1',value);
+  }
+  collapse(read('cc-sidebar-collapsed-v1') === true);
+  for (const id of ['cc-collapse','cc-settings-collapse']) $(id).addEventListener('click',()=>collapse(!document.body.classList.contains('sidebar-collapsed')));
+  function mobileMenu(open) {
+    document.body.classList.toggle('sidebar-open',open);
+    $('cc-menu').setAttribute('aria-expanded',String(open));
+    $('cc-backdrop').hidden=!open;
+    $('cc-sidebar').inert = matchMedia('(max-width: 760px)').matches && !open;
+  }
+  $('cc-menu').addEventListener('click',()=>mobileMenu(!document.body.classList.contains('sidebar-open')));
+  $('cc-backdrop').addEventListener('click',()=>{ mobileMenu(false); $('cc-menu').focus(); });
+  document.addEventListener('keydown',event=>{
+    if (event.key==='Escape' && document.body.classList.contains('sidebar-open')) { mobileMenu(false); $('cc-menu').focus(); }
+    if (event.key==='Tab' && document.body.classList.contains('sidebar-open') && matchMedia('(max-width: 760px)').matches) {
+      const nodes=[...$('cc-sidebar').querySelectorAll('a,button')].filter(el=>el.offsetWidth);
+      if (event.shiftKey && document.activeElement===nodes[0]) { event.preventDefault(); nodes.at(-1).focus(); }
+      else if (!event.shiftKey && document.activeElement===nodes.at(-1)) { event.preventDefault(); nodes[0].focus(); }
+    }
+  });
+  matchMedia('(max-width: 760px)').addEventListener('change',()=>mobileMenu(false));
+  $('cc-menu').addEventListener('click',()=>{ if (document.body.classList.contains('sidebar-open')) $('cc-sidebar').querySelector('a').focus(); });
+  function navigate(key,history=true,focus=true) {
+    if (!(key in labels)) key='overview';
+    module=key;
+    document.querySelectorAll('[data-module-page]').forEach(page=>page.hidden=page.dataset.modulePage!==key);
+    document.querySelectorAll('[data-cc-module]').forEach(button=>{ if(button.dataset.ccModule===key)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current'); });
+    $('cc-page-title').textContent=labels[key]; $('cc-page-description').textContent=descriptions[key]; $('cc-breadcrumb').textContent=`WORKSPACE / ${key==='csat'?'CSAT & DSAT':labels[key].toUpperCase()}`;
+    if (history && location.hash!==`#${key}`) {
+      try { window.history.pushState({module:key},'',`#${key}`); } catch { /* Sandboxed standalone previews may prohibit history changes. */ }
+    }
+    mobileMenu(false); renderContext();
+    if (focus) $('main-content').focus({preventScroll:true});
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  document.querySelectorAll('[data-cc-module]').forEach(button=>button.addEventListener('click',()=>navigate(button.dataset.ccModule)));
+  window.addEventListener('popstate',()=>navigate(location.hash.slice(1),false));
+  window.addEventListener('hashchange',()=>{if(location.hash.slice(1)!==module)navigate(location.hash.slice(1),false);});
+  function openCalls(workspace='ziwo') {
+    navigate('calls');
+    if(workspace==='reports') { reveal('management-title');return; }
+    $(workspace==='manual'?'manual-tab':'report-tab').click();
+  }
+  document.querySelectorAll('[data-open-calls]').forEach(button=>button.addEventListener('click',()=>openCalls(button.dataset.openCalls)));
+  $('cc-open-ziwo').addEventListener('click',()=>{ openCalls(); if (!loadedContext || same(loadedContext,context())) $('ziwo-upload').click(); });
+  document.addEventListener('calls:open',()=>{ if(module!=='calls')navigate('calls'); });
+  document.addEventListener('calls:workspace',renderContext);
+  function reveal(id) {
+    navigate('calls');
+    if(id!=='activity')$('report-tab').click();else $('manual-tab').click();
+    const node=$(id);if(!node)return;
+    let parent=node.parentElement;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}
+    node.scrollIntoView({block:'start'});
+  }
+  document.addEventListener('click',event=>{if(event.target.closest('#show-discrepancies')){const node=$('performance-title');let parent=node.parentElement;while(parent){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}}},true);
+  function renderContext() {
+    const boundContext=!$('report-workspace').hidden ? loadedContext : manual?.context;
+    const mismatch=Boolean(boundContext&&!same(boundContext,context()));
+    $('cc-context-guard').hidden=!mismatch;
+    $('calls-context-content').hidden=mismatch;
+    $('cc-context-guard-message').textContent=mismatch ? `The loaded Calls data belongs to ${contextLabel(boundContext)}. You selected ${contextLabel(context())}. Its data remains in memory and is not shown as performance for this selection.` : '';
+    $('cc-context-note').textContent=boundContext ? `Loaded Calls context: ${contextLabel(boundContext)}. ${mismatch?'Switch back to view it. ':''}Account/Site labels do not validate report origin. All sites never automatically combines UAE and Egypt data.` : 'Select the Account and Site that describe your report before importing. All sites is an unspecified label, not a combined UAE/Egypt calculation.';
+    $('cc-workspace-status').textContent=mismatch?'Data retained · other context':report&&same(loadedContext,context())?'Local · report loaded':manual&&same(manual.context,context())?'Local · manual totals':'Browser only';
+    if(report) updateRange(same(loadedContext,context())?report.from:'',same(loadedContext,context())?report.through:'');
+    $('cc-from').disabled=Boolean(report&&!same(loadedContext,context())) || Boolean(report&&same(loadedContext,context())&&$('ziwo-from').disabled);
+    $('cc-through').disabled=Boolean(report&&!same(loadedContext,context()));
+    $('cc-workspace-status').classList.toggle('status-warning',mismatch);
+    renderOverview();
+  }
+  for (const id of ['cc-account','cc-site']) $(id).addEventListener('change',()=>{store('cc-personal-context-v1',context());renderContext();});
+  $('cc-return-context').addEventListener('click',()=>{const bound=!$('report-workspace').hidden ? loadedContext : manual?.context;if(bound){$('cc-account').value=bound.account;$('cc-site').value=bound.site;store('cc-personal-context-v1',context());renderContext();}});
+  $('cc-replace-context').addEventListener('click',()=>{ $('ziwo-file').click(); });
+  function updateRange(from,through) {
+    $('cc-from').value=from||'';$('cc-through').value=through||'';
+  }
+  for(const id of ['cc-from','cc-through']) $(id).addEventListener('change',()=>{
+    if(report && same(loadedContext,context())) {
+      $('ziwo-from').value=$('cc-from').value;$('ziwo-through').value=$('cc-through').value;
+      $('ziwo-through').dispatchEvent(new Event('change',{bubbles:true}));
+    } else { $('cc-overview-source').textContent='A date range alone does not supply KPI data. Import a report in Calls to analyze this period.'; }
+  });
+  function overviewCard(title,value,unit,note,status='unavailable') {
+    const card=document.createElement('article');card.className=`overview-card ${status}`;
+    const heading=document.createElement('h3');heading.textContent=title;
+    const mark=document.createElement('span');mark.className='overview-mark';mark.textContent=status==='available'?'●':'○';mark.setAttribute('aria-hidden','true');
+    const line=document.createElement('div');line.className='overview-value';line.textContent=value;const small=document.createElement('span');small.textContent=unit;line.append(small);
+    const text=document.createElement('p');text.textContent=note;card.append(heading,mark,line,text);return card;
+  }
+  function renderOverview() {
+    const relevant=report&&same(loadedContext,context());
+    const manualRelevant=manual&&same(manual.context,context())&&(!loadedContext||!same(loadedContext,context()));
+    const data=relevant?report.summary:manualRelevant?manual.metrics:null;
+    const F=DashboardFormat.fixed;
+    const sla=data?.sla ?? null;
+    const abandonment=data?.abandonment ?? null;
+    const aht=manualRelevant?(data?.aht ?? null):null;
+    $('cc-overview-kpis').replaceChildren(
+      overviewCard('Calls SLA',F(sla),'%',data?`Target ≥ ${F(window.DashboardTargets.sla)}% · ${relevant?'Official Ziwo calculation':'Manual totals'}`:'No Calls data in this context',sla===null?'unavailable':'available'),
+      overviewCard('Abandonment',F(abandonment),'%',data?`Target ≤ ${F(window.DashboardTargets.abandonment)}%`:'Import a Calls report to calculate',abandonment===null?'unavailable':'available'),
+      overviewCard('AHT',F(aht),'sec',relevant?'Unavailable in Ziwo · talk time is not AHT':aht===null?'Full handling-time data required':'Calculated from manual handling totals',aht===null?'unavailable':'available'),
+      ...[['Email SLA','Email analytics is not yet operational'],['Quality','Audit scoring is not yet operational'],['CSAT','Survey analytics is not yet operational'],['Agent Performance','Agent scorecards are not yet operational']].map(([title,note])=>overviewCard(title,'—','',note))
+    );
+    $('cc-overview-source').textContent=relevant?`${report.source} · Official Calls performance · ${report.from} → ${report.through}. Local report snapshot; not a live feed.`:manualRelevant?`Manual Calls totals · ${manual.source}. ${manual.source==='Sample data'?'Demonstration data; not live operations.':''}`:loadedContext?`Report retained for ${contextLabel(loadedContext)}. No data is attributed to ${contextLabel(context())}.`:'Import a Ziwo report or enter manual Calls totals. Unavailable channels show no invented live KPI values.';
+  }
+  document.addEventListener('ziwo:loaded',event=>{loadedContext=event.detail.context||context();renderContext();});
+  document.addEventListener('ziwo:summary',event=>{
+    report=event.detail;loadedContext=event.detail.context||loadedContext||context();
+    updateRange(report.from,report.through);renderContext();
+  });
+  document.addEventListener('ziwo:invalid-range',()=>{report=null;updateRange($('ziwo-from').value,$('ziwo-through').value);$('cc-overview-source').textContent='Correct the Calls date range to display performance.';renderOverview();});
+  document.addEventListener('calls:manual',event=>{manual={...event.detail,context:event.detail.context||context()};renderOverview();});
+  document.addEventListener('targetschange',renderOverview);
+  // Collapse lengthy report workflows into distinct, accessible tools without recreating any data or controls.
+  function group(title,nodes,after=null) {
+    if(!nodes.length)return;
+    const detail=document.createElement('details');detail.className='report-tool';
+    const summary=document.createElement('summary');summary.textContent=title;detail.append(summary);
+    const first=nodes[0];first.before(detail);for(const node of nodes)detail.append(node);
+    if(after)after.after(detail);
+    return detail;
+  }
+  group('Management summary & previous-period comparison',[$('management-title').closest('.panel')]);
+  group('Approval records & adjusted simulation',[$('approval-title').closest('.panel'),$('adjusted-title').closest('.panel')],$('ziwo-trend').closest('.panel'));
+  group('Official daily performance & Excel export',[$('performance-title').closest('.panel')]);
+  group('Original daily records & simulation selections',[$('ziwo-daily-heading').closest('.panel')]);
+  const quality=$('ziwo-quality');const qualityGroup=group('Data quality & validation',[quality]);qualityGroup.hidden=quality.hidden;
+  new MutationObserver(()=>{qualityGroup.hidden=quality.hidden;if(!$('quality-invalid').hidden)qualityGroup.open=true;}).observe(quality,{attributes:true,attributeFilter:['hidden'],subtree:true});
+  group('SLA reconciliation & investigation',[$('ziwo-comparison'),$('reconciliation-title').closest('.panel')]);
+  window.CommandCenter={context,navigate,openCalls,reveal};
+  navigate(location.hash.slice(1)||'overview',false,false);
 })();
+
 </script>
+<!-- END EMBEDDED SCRIPTS -->
 </body>
 </html>

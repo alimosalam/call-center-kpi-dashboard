@@ -6,10 +6,10 @@ A responsive dashboard for team leaders, using only HTML, CSS, and vanilla JavaS
 
 1. Download or copy the project folder to your computer. If downloading from GitHub, use **Code → Download ZIP** and extract it first.
 2. Double-click **index.html** to open it in Chrome, Edge, Firefox, or Safari. It includes its own styles and scripts, so you can also open this file alone in an HTML Web Preview.
-3. Replace the sample totals with your figures for the same reporting period. Results update as you type.
+3. The app opens on **Overview**. Select **Calls → Manual totals** to enter figures, or **Calls → Ziwo reports** to import a report. Results update as you type.
 4. **Load sample data** restores the example. **Reset** sets all inputs to zero.
 
-Data stays in your current browser tab; it is not transmitted or saved. Refreshing restores the sample data.
+Report data and approval records stay in your current browser tab; they are not transmitted or saved remotely. Refreshing clears imported reports. Account/Site labels, theme, and sidebar preferences are saved locally in your browser.
 
 ## Calculations and targets
 
@@ -217,3 +217,20 @@ The original-data table's include checkboxes now mean **Include in simulation**.
 Records are local to the loaded report in the current tab; no client approval is fetched, inferred, or verified externally. A new valid report/worksheet or refresh resets the records; an invalid upload leaves saved records and valid analysis intact. Save and download the records in Excel for a durable local copy before replacing the report or refreshing. Missing requested dates are labeled as absent, rather than fabricated. No report or record contents are sent to a server.
 
 New implementation and tests: `ziwo-approvals.js`, `tests/approvals.test.js`, and `tests/approvals.html`. **51 Node tests** pass. The existing **128 browser checks** were rerun, with exclusion assertions updated to require official inclusion and simulation-only changes. **22 additional approval browser checks** cover pending defaults, manual status saves, no automatic official changes, unchanged charts/comparisons, draft preservation, simulation impact, separate exports, record preservation, and responsive layout. Downloaded official and simulated XLSX workbooks were independently opened to verify record values, the retained official dates, simulated exclusion, and blank Full AHT.
+
+
+## Phase 1.1 — unified Command Center
+
+The Command Center is now the application shell, with a collapsible sidebar, Account/Site selectors, reporting range, workspace status, and optional dark mode. Overview shows seven channel cards; unavailable channels show a dash rather than invented results. Its Calls metrics use the loaded **official** report for the selected context, or matching manual totals. Imported Average Talk Time never becomes Full AHT.
+
+**Calls** contains the complete existing manual and Ziwo workflows. Official cards and charts remain visible; management review, approval/simulation controls, daily tables, data quality, and reconciliation use expandable panels to reduce scrolling. Navigation hides existing panels without rebuilding them, preserving reports, chart selections, approval drafts, saved records, and simulation proposals. Official and simulated exports stay separate.
+
+Emails, Quality, CSAT & DSAT, Agent Performance, and cross-channel Management Reports have consistent layouts explicitly marked **Not yet operational**. Management Reports also links to the existing operational Calls reporting tools. Settings provides theme/sidebar controls and a shortcut to the existing Calls formula/target controls. No formulas or target defaults changed.
+
+The original Account options (Relaam, MAF Entertainment, Other), Site options (All sites, UAE, Egypt), and `cc-personal-context-v1` preference remain compatible. Reports capture these labels when file selection starts. Switching context retains the report in memory and displays a guard instead of relabeling its results. Manual totals retain their own context independently. Return to the original selection to recover that workspace, or explicitly import a replacement for the new selection. **All sites never automatically combines UAE and Egypt.** Labels do not verify report origin. New valid imports still replace the current report and reset its report-specific approvals, as before.
+
+The top reporting dates synchronize with the existing report filters; MTD calculates its start automatically. Without a report, dates alone do not create performance data. Theme/sidebar preferences use local browser storage only. The layout adapts from 320px mobile screens to desktop, with a mobile menu, keyboard controls, readable scrollable tables, and dark chart styling.
+
+New source files are `command-center.css` and `command-center.js`. Regenerate `index.html` with `node scripts/embed-assets.js` after editing them. The result remains a self-contained static page compatible with GitHub Pages project paths and sandboxed HTML previews; no backend, remote storage, CDN, or API is used.
+
+Validation: **51 Node tests** and **188 browser checks** (the existing 150 plus 38 navigation/context regressions) pass. Run the new browser suite at `/tests/navigation.html` alongside the existing suites. Additional real-browser checks cover native XLSX upload, official/simulated Excel downloads independently opened with openpyxl, preserved approval drafts, context-switch races, dark mode, stored-context compatibility, 320–1440px layouts, and zero application network requests or console errors. Openpyxl is used only for developer verification, never by the application.
