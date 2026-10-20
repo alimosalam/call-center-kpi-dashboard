@@ -2,6 +2,7 @@
 const { calculate, SAMPLE } = CallCenter;
 const $ = id => document.getElementById(id);
 const inputs = [...document.querySelectorAll('#activity input')];
+let manualContext = null;
 const number = value => value.toLocaleString('en-US', { maximumFractionDigits: 1 });
 const specs = [
   { key: 'sla', title: 'Service level', unit: '%', target: 'Target ≥ 90%', formula: 'Within SLA ÷ offered × 100', icon: '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>' },
@@ -48,10 +49,11 @@ function render(source) {
   }).join('');
   const missed = valid ? specs.slice(0, 3).filter(spec => result.targets[spec.key] === false).map(spec => spec.title.toLowerCase()) : [];
   $('insight').textContent = result.error ? 'Correct the call activity above to see your performance insights.' : !data.offered ? 'Enter your call activity or load sample data to see how your team is performing. A dash means there is no data to calculate a result.' : missed.length ? `Focus on ${missed.join(' and ')}. Review the highlighted KPIs against their targets to identify your next coaching opportunity.` : result.targets.aht === null ? 'Percentage targets are on track. Average handling time needs at least one answered call.' : 'All three performance targets are on track. Keep an eye on these measures throughout your reporting period.';
+  document.dispatchEvent(new CustomEvent('calls:manual', { detail: { metrics: {...metrics}, source, context: manualContext } }));
 }
-function load(data, source) { inputs.forEach(input => { input.value = data[input.name]; }); render(source); }
+function load(data, source) { manualContext = window.CommandCenter?.context() || null; inputs.forEach(input => { input.value = data[input.name]; }); render(source); }
 $('activity').addEventListener('submit', event => event.preventDefault());
-$('activity').addEventListener('input', () => render('Your data · updated live'));
+$('activity').addEventListener('input', () => { manualContext = window.CommandCenter?.context() || null; render('Your data · updated live'); });
 $('sample').addEventListener('click', () => load(SAMPLE, 'Sample data'));
 $('reset').addEventListener('click', () => load({ offered: 0, answered: 0, withinSla: 0, abandoned: 0, handling: 0 }, 'No call activity'));
 load(SAMPLE, 'Sample data');

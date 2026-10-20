@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const z = id => document.getElementById(id);
-  const state = { rows: [], excluded: new Set(), workbook: null, source: '', metric: 'sla', page: 0, chartPage: 0, ticket: 0, lastFile: null, rangeFrom: '', validation: null, analysis: null, performancePage: 0, performance: [], dropThreshold: 10, discrepancyThreshold: 1, approvals: new Map(), approvalDates: [] };
+  const state = { rows: [], excluded: new Set(), workbook: null, source: '', metric: 'sla', page: 0, chartPage: 0, ticket: 0, lastFile: null, rangeFrom: '', validation: null, analysis: null, performancePage: 0, performance: [], dropThreshold: 10, discrepancyThreshold: 1, approvals: new Map(), approvalDates: [], context: null };
   const PAGE = 50, CHART_PAGE = 90;
   const delta = DashboardFormat.pp;
   const rate = DashboardFormat.fixed;
@@ -9,18 +9,20 @@
   const today = () => { const date = new Date(); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; };
   window.DashboardTargets = { ...Ziwo.DEFAULT_TARGETS };
   function workspace(report) {
+    document.dispatchEvent(new CustomEvent('calls:open'));
     z('report-workspace').hidden = !report; z('manual-workspace').hidden = report;
     z('manual-tab').setAttribute('aria-pressed', String(!report)); z('report-tab').setAttribute('aria-pressed', String(report));
+    document.dispatchEvent(new CustomEvent('calls:workspace'));
   }
   z('manual-tab').addEventListener('click', () => workspace(false));
   z('report-tab').addEventListener('click', () => workspace(true));
   z('ziwo-upload').addEventListener('click', () => { workspace(true); z('ziwo-file').click(); });
   function error(message) { z('ziwo-error').textContent = message; z('ziwo-error').hidden = !message; }
-  function setRows(rows, source) {
+  function setRows(rows, source, context = state.context) {
     // Check the entire report for overflow before replacing the current, valid dataset.
     Ziwo.aggregate(rows);
     state.validation = null; state.performancePage = 0;
-    state.rows = rows; state.source = source; state.excluded = new Set(); state.page = 0;
+    state.rows = rows; state.source = source; state.context = context; state.excluded = new Set(); state.page = 0;
     state.approvals = new Map(); state.approvalDates = []; z('approval-records').replaceChildren();
     syncApprovalDates();
     z('approval-feedback').textContent = '';
@@ -30,10 +32,12 @@
     z('ziwo-through').value = active.length ? active[active.length - 1].date : rows[rows.length - 1].date;
     z('report-content').hidden = false;
     error(''); renderReport(true);
+    document.dispatchEvent(new CustomEvent('ziwo:loaded', { detail: { source, context: state.context } }));
   }
   function status() { z('ziwo-status').textContent = `${state.source} · ${state.rows.length.toLocaleString()} original daily records retained in this tab. Uploading another valid report replaces this analysis. Nothing is saved remotely.`; }
   async function importFile(file) {
     const ticket = ++state.ticket;
+    const loadContext = window.CommandCenter?.context() || null;
     workspace(true); error('');
     z('ziwo-status').textContent = `Reading ${file.name} locally…`;
     try {
@@ -45,7 +49,7 @@
         const table = Ziwo.parseCSV(new TextDecoder('utf-8', { fatal: true }).decode(buffer));
         if (ticket !== state.ticket) return;
         const rows = validatedRows(table, { dateFormat: z('ziwo-date-format').value });
-        setRows(rows, file.name); state.lastFile = file; state.workbook = null; z('ziwo-sheet-label').hidden = true;
+        setRows(rows, file.name, loadContext); state.lastFile = file; state.workbook = null; z('ziwo-sheet-label').hidden = true;
       } else {
         const workbook = await ZiwoXlsx.readWorkbook(await file.arrayBuffer());
         if (ticket !== state.ticket) return;
@@ -62,7 +66,7 @@
         if (ticket !== state.ticket) return;
         if (!table) { if (firstError) throw firstError; throw new Error('No worksheet has all required Ziwo column headers in its first row. Select a worksheet or re-export the report.'); }
         z('ziwo-sheet').value = String(selected);
-        setRows(validatedRows(table, { dateFormat: z('ziwo-date-format').value }), `${file.name} / ${workbook.sheets[selected]}`);
+        setRows(validatedRows(table, { dateFormat: z('ziwo-date-format').value }), `${file.name} / ${workbook.sheets[selected]}`, loadContext);
       }
     } catch (e) {
       if (ticket !== state.ticket) return;
@@ -82,7 +86,8 @@
   z('ziwo-date-format').addEventListener('change', () => { if (state.lastFile) importFile(state.lastFile); });
   z('ziwo-sample').addEventListener('click', () => {
     ++state.ticket; state.lastFile = null; state.workbook = null; z('ziwo-sheet-label').hidden = true;
-    setRows(Ziwo.normalizeRows(Ziwo.sampleTable(today())), 'Ziwo sample · synthetic demonstration data');
+    workspace(true);
+    setRows(Ziwo.normalizeRows(Ziwo.sampleTable(today())), 'Ziwo sample · synthetic demonstration data', window.CommandCenter?.context() || null);
   });
   const settings = () => ({ from: z('ziwo-from').value, through: z('ziwo-through').value, view: z('ziwo-view').value, formula: z('ziwo-formula').value, excluded: [] });
   function card(title, value, unit, note, good) {
@@ -100,6 +105,7 @@
       analysis = Ziwo.analyze(state.rows, options);
     } catch (e) {
       z('adjusted-kpis').replaceChildren(); z('approval-impact').replaceChildren(); z('simulation-scope').textContent = 'Choose a valid reporting range.'; z('export-adjusted').disabled = true;
+      document.dispatchEvent(new CustomEvent('ziwo:invalid-range'));
       state.analysis = null; state.performance = []; z('export-performance').disabled = true; z('performance-records').replaceChildren(); z('performance-scope').textContent = 'Correct the date range to display and export results.';
       z('management-values').replaceChildren(); z('period-comparison').replaceChildren(); z('management-warnings').textContent = 'Choose a valid reporting range.';
       z('quality-scope').textContent = 'Quality checks paused: choose a valid date range. Original report data is still retained.'; z('quality-cards').replaceChildren();
@@ -140,6 +146,7 @@
     renderPerformance(analysis);
     renderManagement(analysis);
     syncApprovalDates(); renderApprovalRecords(); renderAdjusted();
+    document.dispatchEvent(new CustomEvent('ziwo:summary', { detail: { summary: {...analysis.summary}, from: analysis.start, through: options.through, source: state.source, context: state.context } }));
   }
   for (const id of ['ziwo-from', 'ziwo-through', 'ziwo-view', 'ziwo-formula']) z(id).addEventListener('change', () => {
     if (id === 'ziwo-from') state.rangeFrom = z('ziwo-from').value;
@@ -265,6 +272,7 @@
     try {
       const options = { ...settings(), from: state.analysis.start, source: state.source, targets: window.DashboardTargets, discrepancyThreshold: state.discrepancyThreshold };
       const tables = ZiwoReview.exportTables(state.performance, options);
+      if (state.context) tables[1].rows.push(['Report Account (label only)', state.context.account], ['Report Site (label only; not verified)', state.context.site]);
       tables[1].rows.push(['Official Inclusion Policy', 'All valid active dates included. Simulation choices and manually recorded approval statuses do not change official KPIs.']);
       tables.push(ZiwoApprovals.exportSheets(state.approvals, state.excluded, 'OFFICIAL PERFORMANCE'));
       tables[1].rows.push(['Daily Table Filter', z('performance-filter').selectedOptions[0].textContent]);
@@ -349,6 +357,7 @@
       const options = {...settings(),from:analysis.start,excluded:[...state.excluded],source:state.source,targets:window.DashboardTargets,discrepancyThreshold:state.discrepancyThreshold};
       const performance = ZiwoReview.dailyPerformance(analysis.rows, options);
       const sheets = ZiwoReview.exportTables(performance, options); sheets[0].name = 'SIMULATION ONLY Adjusted';
+      if (state.context) sheets[1].rows.push(['Report Account (label only)', state.context.account], ['Report Site (label only; not verified)', state.context.site]);
       sheets[1].rows.push(['IMPORTANT', 'ADJUSTED SIMULATION ONLY. Not official performance. Approval statuses are manually entered and not proof of client approval.']);
       sheets.push(ZiwoApprovals.exportSheets(state.approvals, state.excluded, 'ADJUSTED SIMULATION ONLY'));
       const bytes = ZiwoExcel.workbook(sheets), url = URL.createObjectURL(new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
